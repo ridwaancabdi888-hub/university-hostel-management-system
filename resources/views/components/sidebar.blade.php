@@ -31,12 +31,13 @@
 
     <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-4">
         @foreach ($navigation as $item)
+            @php $isActive = request()->routeIs(...($item['active'] ?? [$item['route']])); @endphp
             <a
                 href="{{ route($item['route']) }}"
                 @class([
                     'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition',
-                    'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400' => request()->routeIs($item['route']),
-                    'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white' => ! request()->routeIs($item['route']),
+                    'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400' => $isActive,
+                    'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white' => ! $isActive,
                 ])
             >
                 <x-nav-icon :name="$item['icon']" />

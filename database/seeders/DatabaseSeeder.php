@@ -39,5 +39,10 @@ class DatabaseSeeder extends Seeder
             'email' => 'student@hostel.test',
             'role' => Role::Student,
         ]);
+
+        $this->call([
+            RoomTypeSeeder::class,
+            RoomInventorySeeder::class,
+        ]);
     }
 }

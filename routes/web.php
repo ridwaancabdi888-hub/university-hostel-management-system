@@ -1,10 +1,14 @@
 <?php
 
+use App\Http\Controllers\BlockController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FinancialsController;
+use App\Http\Controllers\FloorController;
+use App\Http\Controllers\HostelController;
 use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\RoomAllocationController;
+use App\Http\Controllers\RoomController;
+use App\Http\Controllers\RoomTypeController;
 use App\Http\Controllers\StudentDirectoryController;
 use Illuminate\Support\Facades\Route;
 
@@ -16,7 +20,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::middleware('role:admin,warden')->group(function () {
-        Route::get('/room-allocation', [RoomAllocationController::class, 'index'])->name('room-allocation');
+        Route::resource('rooms', RoomController::class)->except('show');
+        Route::resource('hostels', HostelController::class)->except('show');
+        Route::resource('blocks', BlockController::class)->except('show');
+        Route::resource('floors', FloorController::class)->except('show');
+        Route::resource('room-types', RoomTypeController::class)->except('show');
     });
 
     Route::middleware('role:admin,warden,accountant')->group(function () {
