@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[ObservedBy(InvoiceObserver::class)]
 class Invoice extends Model
@@ -53,9 +54,46 @@ class Invoice extends Model
         return $this->belongsTo(RoomAllocation::class);
     }
 
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    /**
+     * Total recorded against this invoice. Uses the eager-loaded
+     * payments_sum_amount (via withSum) when available to avoid an
+     * extra query per row on listing pages.
+     */
+    public function amountPaid(): float
+    {
+        return (float) ($this->payments_sum_amount ?? $this->payments()->sum('amount'));
+    }
+
+    public function balance(): float
+    {
+        return round((float) $this->total_amount - $this->amountPaid(), 2);
+    }
+
+    /**
+     * unpaid | partial | paid | cancelled — independent of the stored
+     * status column, which only distinguishes cancelled from active.
+     */
+    public function paymentStatus(): string
+    {
+        if ($this->status === InvoiceStatus::Cancelled) {
+            return 'cancelled';
+        }
+
+        if ($this->balance() <= 0) {
+            return 'paid';
+        }
+
+        return $this->amountPaid() > 0 ? 'partial' : 'unpaid';
+    }
+
     public function isOverdue(): bool
     {
-        return $this->status === InvoiceStatus::Unpaid && $this->due_date->isPast();
+        return $this->status !== InvoiceStatus::Cancelled && $this->balance() > 0 && $this->due_date->isPast();
     }
 
     public function scopeOverdue(Builder $query): Builder

@@ -1,4 +1,6 @@
 <x-dashboard-layout title="Billing History">
+    <x-financial-tabs active="invoices" />
+
     <div class="mb-4 flex items-center justify-between">
         <p class="text-sm text-gray-500 dark:text-gray-400">Monthly rent, utility charges, late fees, and discounts for every student.</p>
         <div class="flex items-center gap-3">
@@ -20,7 +22,9 @@
                 <x-input-label for="status" value="Status" />
                 <x-select id="status" name="status" class="mt-1 block w-full">
                     <option value="">All</option>
+                    <option value="pending" @selected(($filters['status'] ?? '') === 'pending')>Pending Payment</option>
                     <option value="unpaid" @selected(($filters['status'] ?? '') === 'unpaid')>Unpaid</option>
+                    <option value="partial" @selected(($filters['status'] ?? '') === 'partial')>Partially Paid</option>
                     <option value="overdue" @selected(($filters['status'] ?? '') === 'overdue')>Overdue</option>
                     <option value="paid" @selected(($filters['status'] ?? '') === 'paid')>Paid</option>
                     <option value="cancelled" @selected(($filters['status'] ?? '') === 'cancelled')>Cancelled</option>
@@ -42,6 +46,7 @@
                     <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Student</th>
                     <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Billing Month</th>
                     <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Total</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Balance</th>
                     <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Due</th>
                     <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</th>
                     <th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Actions</th>
@@ -59,6 +64,7 @@
                         </td>
                         <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $invoice->billing_month->format('F Y') }}</td>
                         <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">${{ number_format($invoice->total_amount, 2) }}</td>
+                        <td class="px-4 py-3 text-sm font-medium {{ $invoice->balance() > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-gray-500 dark:text-gray-400' }}">${{ number_format($invoice->balance(), 2) }}</td>
                         <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $invoice->due_date->format('M j, Y') }}</td>
                         <td class="px-4 py-3 text-sm"><x-invoices.status-badge :invoice="$invoice" /></td>
                         <td class="px-4 py-3 text-right text-sm">
@@ -67,7 +73,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">No invoices match your search.</td>
+                        <td colspan="8" class="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">No invoices match your search.</td>
                     </tr>
                 @endforelse
             </tbody>

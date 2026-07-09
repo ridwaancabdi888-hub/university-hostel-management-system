@@ -7,7 +7,9 @@ use App\Http\Controllers\FloorController;
 use App\Http\Controllers\HostelController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\MaintenanceController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\RoomTypeController;
 use App\Http\Controllers\StudentController;
@@ -66,9 +68,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/invoices/{invoice}/edit', [InvoiceController::class, 'edit'])->name('invoices.edit');
         Route::put('/invoices/{invoice}', [InvoiceController::class, 'update'])->name('invoices.update');
         Route::delete('/invoices/{invoice}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
-        Route::post('/invoices/{invoice}/mark-paid', [InvoiceController::class, 'markPaid'])->name('invoices.mark-paid');
         Route::post('/invoices/{invoice}/apply-late-fee', [InvoiceController::class, 'applyLateFee'])->name('invoices.apply-late-fee');
         Route::get('/invoices/{invoice}/pdf', [InvoiceController::class, 'pdf'])->name('invoices.pdf');
+
+        Route::post('/invoices/{invoice}/payments', [PaymentController::class, 'store'])->name('payments.store');
+        Route::delete('/payments/{payment}', [PaymentController::class, 'destroy'])->name('payments.destroy');
+        Route::get('/payments/{payment}/receipt', [PaymentController::class, 'receipt'])->name('payments.receipt');
+
+        Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     });
 });
 

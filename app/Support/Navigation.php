@@ -43,7 +43,7 @@ class Navigation
             [
                 'label' => 'Financials',
                 'route' => 'invoices.index',
-                'active' => ['invoices.*'],
+                'active' => ['invoices.*', 'payments.*', 'reports.*'],
                 'icon' => 'banknotes',
                 'roles' => [Role::Admin, Role::Accountant],
             ],

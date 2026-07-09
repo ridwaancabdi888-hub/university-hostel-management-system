@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Enums\InvoiceStatus;
 use App\Models\Invoice;
 use App\Models\StudentProfile;
 use Illuminate\Database\Seeder;
@@ -21,18 +20,19 @@ class InvoiceSeeder extends Seeder
         foreach ($students as $student) {
             $rate = $student->activeAllocation->room->roomType->monthly_rate;
 
-            // Two months ago: paid in full.
-            $this->makeInvoice($student, $rate, 2, InvoiceStatus::Paid);
+            // Two months ago: PaymentSeeder will pay this one off in full.
+            $this->makeInvoice($student, $rate, 2);
 
-            // Last month: still unpaid and past its due date (overdue).
-            $this->makeInvoice($student, $rate, 1, InvoiceStatus::Unpaid, dueInPast: true);
+            // Last month: past its due date — left unpaid/partial so it
+            // shows up as overdue until PaymentSeeder settles some of them.
+            $this->makeInvoice($student, $rate, 1, dueInPast: true);
 
             // Current month: freshly billed, not yet due.
-            $this->makeInvoice($student, $rate, 0, InvoiceStatus::Unpaid);
+            $this->makeInvoice($student, $rate, 0);
         }
     }
 
-    private function makeInvoice(StudentProfile $student, float $rate, int $monthsAgo, InvoiceStatus $status, bool $dueInPast = false): void
+    private function makeInvoice(StudentProfile $student, float $rate, int $monthsAgo, bool $dueInPast = false): void
     {
         $billingMonth = now()->subMonths($monthsAgo)->startOfMonth();
         $dueDate = $dueInPast ? $billingMonth->copy()->addDays(10) : $billingMonth->copy()->addDays(25);
@@ -44,8 +44,6 @@ class InvoiceSeeder extends Seeder
             'rent_amount' => $rate,
             'utility_amount' => 25.00,
             'due_date' => $dueDate,
-            'status' => $status,
-            'paid_at' => $status === InvoiceStatus::Paid ? $billingMonth->copy()->addDays(5) : null,
         ]);
     }
 }

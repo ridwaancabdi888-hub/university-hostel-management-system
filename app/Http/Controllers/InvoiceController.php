@@ -25,7 +25,7 @@ class InvoiceController extends Controller
      */
     public function index(Request $request): View
     {
-        $query = Invoice::with(['studentProfile.user']);
+        $query = Invoice::with(['studentProfile.user'])->withSum('payments', 'amount');
 
         if ($search = $request->string('search')->trim()->toString()) {
             $query->where(function ($query) use ($search) {
@@ -35,9 +35,16 @@ class InvoiceController extends Controller
             });
         }
 
+        // Raw correlated subqueries (rather than HAVING on the withSum
+        // alias) because MySQL's ONLY_FULL_GROUP_BY mode rejects a HAVING
+        // clause that references a non-aggregated, non-grouped column.
+        $paidSubquery = '(select coalesce(sum(amount), 0) from payments where payments.invoice_id = invoices.id)';
+
         match ($request->string('status')->toString()) {
             'overdue' => $query->overdue(),
-            'unpaid' => $query->where('status', InvoiceStatus::Unpaid),
+            'pending' => $query->where('status', '!=', InvoiceStatus::Cancelled)->whereRaw("{$paidSubquery} < total_amount"),
+            'unpaid' => $query->where('status', InvoiceStatus::Unpaid)->whereRaw("{$paidSubquery} = 0"),
+            'partial' => $query->where('status', InvoiceStatus::Unpaid)->whereRaw("{$paidSubquery} > 0"),
             'paid' => $query->where('status', InvoiceStatus::Paid),
             'cancelled' => $query->where('status', InvoiceStatus::Cancelled),
             default => null,
@@ -85,7 +92,12 @@ class InvoiceController extends Controller
      */
     public function show(Invoice $invoice): View
     {
-        $invoice->load(['studentProfile.user', 'roomAllocation.room.floor.block.hostel']);
+        $invoice->load([
+            'studentProfile.user',
+            'roomAllocation.room.floor.block.hostel',
+            'payments' => fn ($query) => $query->latest('paid_at'),
+            'payments.recordedBy',
+        ]);
 
         return view('invoices.show', [
             'invoice' => $invoice,
@@ -115,13 +127,13 @@ class InvoiceController extends Controller
     }
 
     /**
-     * Remove the specified invoice, unless it has already been paid.
+     * Remove the specified invoice, unless it has recorded payments.
      */
     public function destroy(Invoice $invoice): RedirectResponse
     {
-        if ($invoice->status === InvoiceStatus::Paid) {
+        if ($invoice->payments()->exists()) {
             return redirect()->route('invoices.index')
-                ->with('error', "Cannot delete invoice \"{$invoice->invoice_number}\" because it has already been paid.");
+                ->with('error', "Cannot delete invoice \"{$invoice->invoice_number}\" because it has recorded payments.");
         }
 
         $invoice->delete();
@@ -179,19 +191,6 @@ class InvoiceController extends Controller
 
         return redirect()->route('invoices.index')
             ->with('status', "Generated {$generated} invoice(s) for {$billingMonth->format('F Y')}.".($skipped ? " Skipped {$skipped} student(s) already billed." : ''));
-    }
-
-    /**
-     * Mark an invoice as paid.
-     */
-    public function markPaid(Invoice $invoice): RedirectResponse
-    {
-        $invoice->update([
-            'status' => InvoiceStatus::Paid,
-            'paid_at' => now(),
-        ]);
-
-        return redirect()->route('invoices.show', $invoice)->with('status', 'Invoice marked as paid.');
     }
 
     /**

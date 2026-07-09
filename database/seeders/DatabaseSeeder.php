@@ -43,6 +43,7 @@ class DatabaseSeeder extends Seeder
             StudentSeeder::class,
             AllocationSeeder::class,
             InvoiceSeeder::class,
+            PaymentSeeder::class,
         ]);
     }
 }
