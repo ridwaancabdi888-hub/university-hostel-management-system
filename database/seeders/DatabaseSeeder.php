@@ -44,6 +44,7 @@ class DatabaseSeeder extends Seeder
             AllocationSeeder::class,
             InvoiceSeeder::class,
             PaymentSeeder::class,
+            MaintenanceSeeder::class,
         ]);
     }
 }

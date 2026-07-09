@@ -36,7 +36,8 @@ class Navigation
             ],
             [
                 'label' => 'Maintenance',
-                'route' => 'maintenance',
+                'route' => 'maintenance.index',
+                'active' => ['maintenance.*'],
                 'icon' => 'wrench',
                 'roles' => [Role::Admin, Role::Warden, Role::Student],
             ],

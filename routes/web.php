@@ -6,7 +6,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FloorController;
 use App\Http\Controllers\HostelController;
 use App\Http\Controllers\InvoiceController;
-use App\Http\Controllers\MaintenanceController;
+use App\Http\Controllers\MaintenanceCommentController;
+use App\Http\Controllers\MaintenanceRequestController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
@@ -50,8 +51,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('students', StudentController::class)->only(['index', 'show']);
     });
 
+    // The "create" route must be registered before the "{ticket}" wildcard
+    // routes below, otherwise "create" is matched as a ticket ID.
     Route::middleware('role:admin,warden,student')->group(function () {
-        Route::get('/maintenance', [MaintenanceController::class, 'index'])->name('maintenance');
+        Route::get('/maintenance/create', [MaintenanceRequestController::class, 'create'])->name('maintenance.create');
+        Route::post('/maintenance', [MaintenanceRequestController::class, 'store'])->name('maintenance.store');
+
+        Route::get('/maintenance', [MaintenanceRequestController::class, 'index'])->name('maintenance.index');
+        Route::get('/maintenance/{ticket}', [MaintenanceRequestController::class, 'show'])->name('maintenance.show');
+        Route::get('/maintenance/{ticket}/edit', [MaintenanceRequestController::class, 'edit'])->name('maintenance.edit');
+        Route::put('/maintenance/{ticket}', [MaintenanceRequestController::class, 'update'])->name('maintenance.update');
+        Route::post('/maintenance/{ticket}/status', [MaintenanceRequestController::class, 'updateStatus'])->name('maintenance.status');
+        Route::post('/maintenance/{ticket}/comments', [MaintenanceCommentController::class, 'store'])->name('maintenance.comments.store');
+    });
+
+    Route::middleware('role:admin,warden')->group(function () {
+        Route::post('/maintenance/{ticket}/assign', [MaintenanceRequestController::class, 'assign'])->name('maintenance.assign');
     });
 
     // The "create"/"generate" routes must be registered before the
