@@ -10,6 +10,7 @@ use App\Http\Requests\UpdateMaintenanceStatusRequest;
 use App\Models\MaintenanceRequest;
 use App\Models\StudentProfile;
 use App\Models\User;
+use App\Notifications\MaintenanceAssigned;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -139,7 +140,13 @@ class MaintenanceRequestController extends Controller
      */
     public function assign(AssignStaffRequest $request, MaintenanceRequest $ticket): RedirectResponse
     {
-        $ticket->update(['assigned_to' => $request->validated()['assigned_to']]);
+        $assignedTo = $request->validated()['assigned_to'];
+
+        $ticket->update(['assigned_to' => $assignedTo]);
+
+        if ($assignedTo) {
+            User::find($assignedTo)->notify(new MaintenanceAssigned($ticket));
+        }
 
         return redirect()->route('maintenance.show', $ticket)->with('status', 'Staff assignment updated.');
     }

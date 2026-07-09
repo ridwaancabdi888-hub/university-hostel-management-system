@@ -8,12 +8,14 @@ use App\Http\Controllers\HostelController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\MaintenanceCommentController;
 use App\Http\Controllers\MaintenanceRequestController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\RoomTypeController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\VisitorController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -92,6 +94,27 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     });
+
+    // The "create" route must be registered before the "{visitor}" wildcard
+    // routes below, otherwise "create" is matched as a visitor ID.
+    Route::middleware('role:admin,warden,student')->group(function () {
+        Route::get('/visitors/create', [VisitorController::class, 'create'])->name('visitors.create');
+        Route::post('/visitors', [VisitorController::class, 'store'])->name('visitors.store');
+
+        Route::get('/visitors', [VisitorController::class, 'index'])->name('visitors.index');
+        Route::get('/visitors/{visitor}', [VisitorController::class, 'show'])->name('visitors.show');
+        Route::get('/visitors/{visitor}/edit', [VisitorController::class, 'edit'])->name('visitors.edit');
+        Route::put('/visitors/{visitor}', [VisitorController::class, 'update'])->name('visitors.update');
+    });
+
+    Route::middleware('role:admin,warden')->group(function () {
+        Route::post('/visitors/{visitor}/approve', [VisitorController::class, 'approve'])->name('visitors.approve');
+        Route::post('/visitors/{visitor}/reject', [VisitorController::class, 'reject'])->name('visitors.reject');
+    });
+
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
+    Route::post('/notifications/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');
 });
 
 Route::middleware('auth')->group(function () {

@@ -11,6 +11,55 @@
         {{ $title }}
     </h1>
 
+    <!-- Notifications -->
+    @php
+        $unreadNotifications = auth()->user()->unreadNotifications()->latest()->limit(8)->get();
+        $unreadCount = auth()->user()->unreadNotifications()->count();
+    @endphp
+    <x-dropdown align="right" width="w-80">
+        <x-slot name="trigger">
+            <button class="relative rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200" aria-label="Notifications">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                </svg>
+                @if ($unreadCount > 0)
+                    <span class="absolute right-1 top-1 flex h-2 w-2 rounded-full bg-red-500"></span>
+                @endif
+            </button>
+        </x-slot>
+
+        <x-slot name="content">
+            <div class="flex items-center justify-between border-b border-gray-100 px-4 py-2 dark:border-gray-600">
+                <span class="text-sm font-semibold text-gray-700 dark:text-gray-200">Notifications</span>
+                @if ($unreadCount > 0)
+                    <form method="POST" action="{{ route('notifications.read-all') }}">
+                        @csrf
+                        <button type="submit" class="text-xs font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">Mark all read</button>
+                    </form>
+                @endif
+            </div>
+
+            <div class="max-h-96 overflow-y-auto">
+                @forelse ($unreadNotifications as $notification)
+                    <form method="POST" action="{{ route('notifications.read', $notification->id) }}">
+                        @csrf
+                        <button type="submit" class="block w-full px-4 py-3 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-600">
+                            <span class="block font-medium text-gray-700 dark:text-gray-200">{{ $notification->data['title'] ?? 'Notification' }}</span>
+                            <span class="mt-0.5 block text-xs text-gray-500 dark:text-gray-400">{{ $notification->data['message'] ?? '' }}</span>
+                            <span class="mt-0.5 block text-xs text-gray-400 dark:text-gray-500">{{ $notification->created_at->diffForHumans() }}</span>
+                        </button>
+                    </form>
+                @empty
+                    <p class="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">You're all caught up.</p>
+                @endforelse
+            </div>
+
+            <div class="border-t border-gray-100 px-4 py-2 dark:border-gray-600">
+                <a href="{{ route('notifications.index') }}" class="text-xs font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">View all notifications</a>
+            </div>
+        </x-slot>
+    </x-dropdown>
+
     <!-- Dark mode toggle -->
     <button
         @click="darkMode = ! darkMode"

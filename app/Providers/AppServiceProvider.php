@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Contracts\SmsGateway;
+use App\Services\Sms\LogSmsGateway;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -11,7 +13,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Swap this binding for a real provider (Twilio, Vonage, Africa's
+        // Talking, etc.) once credentials exist — nothing else changes.
+        $this->app->bind(SmsGateway::class, LogSmsGateway::class);
     }
 
     /**

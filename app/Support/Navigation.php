@@ -42,6 +42,13 @@ class Navigation
                 'roles' => [Role::Admin, Role::Warden, Role::Student],
             ],
             [
+                'label' => 'Visitors',
+                'route' => 'visitors.index',
+                'active' => ['visitors.*'],
+                'icon' => 'user-plus',
+                'roles' => [Role::Admin, Role::Warden, Role::Student],
+            ],
+            [
                 'label' => 'Financials',
                 'route' => 'invoices.index',
                 'active' => ['invoices.*', 'payments.*', 'reports.*'],

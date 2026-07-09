@@ -38,6 +38,14 @@ class User extends Authenticatable
     }
 
     /**
+     * The phone number to use for the "sms" notification channel.
+     */
+    public function routeNotificationForSms(): ?string
+    {
+        return $this->studentProfile?->phone;
+    }
+
+    /**
      * The attributes that should be hidden for serialization.
      *
      * @var list<string>

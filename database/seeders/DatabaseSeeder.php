@@ -45,6 +45,7 @@ class DatabaseSeeder extends Seeder
             InvoiceSeeder::class,
             PaymentSeeder::class,
             MaintenanceSeeder::class,
+            VisitorSeeder::class,
         ]);
     }
 }
