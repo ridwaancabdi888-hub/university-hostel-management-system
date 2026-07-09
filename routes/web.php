@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AllocationController;
 use App\Http\Controllers\BlockController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FinancialsController;
@@ -20,11 +21,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::middleware('role:admin,warden')->group(function () {
-        Route::resource('rooms', RoomController::class)->except('show');
+        Route::resource('rooms', RoomController::class);
         Route::resource('hostels', HostelController::class)->except('show');
         Route::resource('blocks', BlockController::class)->except('show');
         Route::resource('floors', FloorController::class)->except('show');
         Route::resource('room-types', RoomTypeController::class)->except('show');
+
+        Route::get('/allocations/create', [AllocationController::class, 'create'])->name('allocations.create');
+        Route::post('/allocations', [AllocationController::class, 'store'])->name('allocations.store');
+        Route::get('/allocations/{allocation}/transfer', [AllocationController::class, 'transferForm'])->name('allocations.transfer.form');
+        Route::post('/allocations/{allocation}/transfer', [AllocationController::class, 'transfer'])->name('allocations.transfer');
+        Route::post('/allocations/{allocation}/vacate', [AllocationController::class, 'vacate'])->name('allocations.vacate');
+    });
+
+    Route::middleware('role:admin,warden,accountant')->group(function () {
+        Route::get('/allocations', [AllocationController::class, 'index'])->name('allocations.index');
     });
 
     // The "create" route must be registered before the "{student}" wildcard

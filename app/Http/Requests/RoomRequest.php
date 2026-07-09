@@ -24,6 +24,13 @@ class RoomRequest extends FormRequest
      */
     public function rules(): array
     {
+        $room = $this->route('room');
+
+        // Capacity can never drop below the beds currently occupied by
+        // active allocations — occupancy itself is derived automatically
+        // from those allocations and is not directly editable here.
+        $minCapacity = max(1, $room?->occupied_beds ?? 1);
+
         return [
             'floor_id' => ['required', 'integer', 'exists:floors,id'],
             'room_type_id' => ['required', 'integer', 'exists:room_types,id'],
@@ -33,8 +40,7 @@ class RoomRequest extends FormRequest
                     ->where(fn ($query) => $query->where('floor_id', $this->input('floor_id')))
                     ->ignore($this->route('room')),
             ],
-            'capacity' => ['required', 'integer', 'min:1', 'max:20'],
-            'occupied_beds' => ['required', 'integer', 'min:0', 'lte:capacity'],
+            'capacity' => ['required', 'integer', "min:{$minCapacity}", 'max:20'],
             'status' => ['required', Rule::enum(RoomStatus::class)],
             'notes' => ['nullable', 'string', 'max:1000'],
         ];

@@ -40,14 +40,14 @@ class RoomInventorySeeder extends Seeder
             ],
         ];
 
-        // [room type name, occupied beds, status]
+        // [room type name, status]
         $roomPlan = [
-            ['Single Premium', 1, RoomStatus::Available],
-            ['Double Shared', 1, RoomStatus::Available],
-            ['Double Shared', 0, RoomStatus::Available],
-            ['Quad Suite', 0, RoomStatus::Available],
-            ['Triple Shared', 3, RoomStatus::Available],
-            ['Single Premium', 0, RoomStatus::Maintenance],
+            ['Single Premium', RoomStatus::Available],
+            ['Double Shared', RoomStatus::Available],
+            ['Double Shared', RoomStatus::Available],
+            ['Quad Suite', RoomStatus::Available],
+            ['Triple Shared', RoomStatus::Available],
+            ['Single Premium', RoomStatus::Maintenance],
         ];
 
         foreach ($blocks as $blockName => $floors) {
@@ -61,7 +61,7 @@ class RoomInventorySeeder extends Seeder
                     ['name' => $floorData['name']]
                 );
 
-                foreach ($roomPlan as $roomIndex => [$typeName, $occupiedBeds, $status]) {
+                foreach ($roomPlan as $roomIndex => [$typeName, $status]) {
                     $roomType = $roomTypes[$typeName];
 
                     $floor->rooms()->firstOrCreate(
@@ -69,7 +69,6 @@ class RoomInventorySeeder extends Seeder
                         [
                             'room_type_id' => $roomType->id,
                             'capacity' => $roomType->default_capacity,
-                            'occupied_beds' => $occupiedBeds,
                             'status' => $status,
                         ]
                     );

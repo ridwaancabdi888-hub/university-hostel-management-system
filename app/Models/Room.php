@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Enums\AllocationStatus;
 use App\Enums\RoomStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Room extends Model
 {
@@ -35,6 +37,31 @@ class Room extends Model
     public function roomType(): BelongsTo
     {
         return $this->belongsTo(RoomType::class);
+    }
+
+    public function allocations(): HasMany
+    {
+        return $this->hasMany(RoomAllocation::class);
+    }
+
+    public function activeAllocations(): HasMany
+    {
+        return $this->allocations()->where('status', AllocationStatus::Active);
+    }
+
+    /**
+     * The bed numbers (1..capacity) that are not currently occupied.
+     *
+     * @return list<int>
+     */
+    public function availableBedNumbers(): array
+    {
+        $taken = $this->activeAllocations()->pluck('bed_number')->all();
+
+        return collect(range(1, $this->capacity))
+            ->reject(fn (int $bed) => in_array($bed, $taken, true))
+            ->values()
+            ->all();
     }
 
     /**

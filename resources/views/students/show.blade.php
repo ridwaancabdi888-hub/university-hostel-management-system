@@ -44,6 +44,69 @@
         </div>
     </div>
 
+    <div class="mt-6 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+        <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Housing</h3>
+
+        @if ($student->activeAllocation)
+            <div class="mt-4 flex flex-wrap items-center justify-between gap-4">
+                <div>
+                    <a href="{{ route('rooms.show', $student->activeAllocation->room) }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">
+                        {{ $student->activeAllocation->room->room_number }} — Bed {{ $student->activeAllocation->bed_number }}
+                    </a>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                        {{ $student->activeAllocation->room->floor->block->name }} ({{ $student->activeAllocation->room->floor->block->hostel->name }}) · Since {{ $student->activeAllocation->allocated_at->format('M j, Y') }}
+                    </p>
+                </div>
+                @if (auth()->user()->role !== \App\Enums\Role::Accountant)
+                    <div class="flex items-center gap-3">
+                        <a href="{{ route('allocations.transfer.form', $student->activeAllocation) }}" class="inline-flex items-center rounded-md bg-white px-3 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 shadow-sm ring-1 ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-600 dark:hover:bg-gray-700">
+                            Transfer
+                        </a>
+                        <x-delete-button :action="route('allocations.vacate', $student->activeAllocation)" confirm="Vacate this student's room?">
+                            Vacate
+                        </x-delete-button>
+                    </div>
+                @endif
+            </div>
+        @else
+            <div class="mt-4 flex items-center justify-between gap-4">
+                <p class="text-sm text-gray-500 dark:text-gray-400">Not currently allocated to a room.</p>
+                @if (auth()->user()->role !== \App\Enums\Role::Accountant)
+                    <a href="{{ route('allocations.create', ['student_profile_id' => $student->id]) }}" class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-white hover:bg-indigo-500">
+                        Allocate Room
+                    </a>
+                @endif
+            </div>
+        @endif
+
+        @if ($allocationHistory->isNotEmpty())
+            <div class="mt-6 overflow-x-auto border-t border-gray-200 pt-4 dark:border-gray-700">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead>
+                        <tr>
+                            <th class="px-2 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Room</th>
+                            <th class="px-2 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Bed</th>
+                            <th class="px-2 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Allocated</th>
+                            <th class="px-2 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Vacated</th>
+                            <th class="px-2 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        @foreach ($allocationHistory as $entry)
+                            <tr>
+                                <td class="px-2 py-2 text-sm text-gray-900 dark:text-gray-100">{{ $entry->room->room_number }}</td>
+                                <td class="px-2 py-2 text-sm text-gray-500 dark:text-gray-400">{{ $entry->bed_number }}</td>
+                                <td class="px-2 py-2 text-sm text-gray-500 dark:text-gray-400">{{ $entry->allocated_at->format('M j, Y') }}</td>
+                                <td class="px-2 py-2 text-sm text-gray-500 dark:text-gray-400">{{ $entry->vacated_at?->format('M j, Y') ?? '—' }}</td>
+                                <td class="px-2 py-2 text-sm"><x-allocations.status-badge :status="$entry->status" /></td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
+    </div>
+
     <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div class="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
             <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Profile</h3>

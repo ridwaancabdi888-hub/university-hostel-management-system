@@ -90,10 +90,11 @@ class StudentController extends Controller
      */
     public function show(StudentProfile $student): View
     {
-        $student->load('user');
+        $student->load(['user', 'activeAllocation.room.floor.block.hostel']);
 
         return view('students.show', [
             'student' => $student,
+            'allocationHistory' => $student->allocations()->with('room.floor.block.hostel')->latest('allocated_at')->get(),
         ]);
     }
 
@@ -150,6 +151,11 @@ class StudentController extends Controller
      */
     public function destroy(StudentProfile $student): RedirectResponse
     {
+        if ($student->activeAllocation) {
+            return redirect()->route('students.show', $student)
+                ->with('error', 'Vacate this student\'s room allocation before removing them.');
+        }
+
         if ($student->photo_path) {
             Storage::disk('public')->delete($student->photo_path);
         }

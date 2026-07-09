@@ -75,12 +75,16 @@
             <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                 @forelse ($rooms as $room)
                     <tr>
-                        <td class="px-4 py-3 text-sm font-semibold text-indigo-600 dark:text-indigo-400">{{ $room->room_number }}</td>
+                        <td class="px-4 py-3 text-sm font-semibold">
+                            <a href="{{ route('rooms.show', $room) }}" class="text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">{{ $room->room_number }}</a>
+                        </td>
                         <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $room->floor->block->name }}</td>
                         <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $room->floor->name }}</td>
                         <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $room->roomType->name }}</td>
                         <td class="px-4 py-3 text-sm"><x-rooms.occupancy-badge :room="$room" /></td>
                         <td class="px-4 py-3 text-right text-sm">
+                            <a href="{{ route('rooms.show', $room) }}" class="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">View</a>
+                            <span class="mx-2 text-gray-300 dark:text-gray-600">|</span>
                             <a href="{{ route('rooms.edit', $room) }}" class="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">Edit</a>
                             <span class="mx-2 text-gray-300 dark:text-gray-600">|</span>
                             <x-delete-button :action="route('rooms.destroy', $room)" confirm="Delete this room?" class="inline">Delete</x-delete-button>

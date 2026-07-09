@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\AllocationStatus;
 use App\Enums\Gender;
 use App\Enums\StudentStatus;
 use App\Enums\YearLevel;
@@ -9,6 +10,8 @@ use Database\Factories\StudentProfileFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Storage;
 
 class StudentProfile extends Model
@@ -55,5 +58,15 @@ class StudentProfile extends Model
     public function photoUrl(): ?string
     {
         return $this->photo_path ? Storage::disk('public')->url($this->photo_path) : null;
+    }
+
+    public function allocations(): HasMany
+    {
+        return $this->hasMany(RoomAllocation::class);
+    }
+
+    public function activeAllocation(): HasOne
+    {
+        return $this->hasOne(RoomAllocation::class)->where('status', AllocationStatus::Active);
     }
 }

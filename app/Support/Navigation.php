@@ -23,7 +23,7 @@ class Navigation
             [
                 'label' => 'Room Allocation',
                 'route' => 'rooms.index',
-                'active' => ['rooms.*', 'hostels.*', 'blocks.*', 'floors.*', 'room-types.*'],
+                'active' => ['rooms.*', 'hostels.*', 'blocks.*', 'floors.*', 'room-types.*', 'allocations.*'],
                 'icon' => 'bed',
                 'roles' => [Role::Admin, Role::Warden],
             ],

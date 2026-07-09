@@ -3,6 +3,7 @@
 @php
     $tabs = [
         'rooms' => ['label' => 'Rooms', 'route' => 'rooms.index'],
+        'allocations' => ['label' => 'Allocation History', 'route' => 'allocations.index'],
         'room-types' => ['label' => 'Room Types', 'route' => 'room-types.index'],
         'floors' => ['label' => 'Floors', 'route' => 'floors.index'],
         'blocks' => ['label' => 'Blocks', 'route' => 'blocks.index'],

@@ -40,13 +40,16 @@
         <x-text-input id="capacity" name="capacity" type="number" min="1" max="20" class="mt-1 block w-full" required
             :value="old('capacity', $room->capacity ?? '')" />
         <x-input-error :messages="$errors->get('capacity')" class="mt-2" />
+        @if ($room && $room->occupied_beds > 0)
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Can't be set below {{ $room->occupied_beds }} — the beds currently occupied.</p>
+        @endif
     </div>
 
     <div>
-        <x-input-label for="occupied_beds" value="Occupied Beds" />
-        <x-text-input id="occupied_beds" name="occupied_beds" type="number" min="0" max="20" class="mt-1 block w-full" required
-            :value="old('occupied_beds', $room->occupied_beds ?? 0)" />
-        <x-input-error :messages="$errors->get('occupied_beds')" class="mt-2" />
+        <x-input-label value="Occupied Beds" />
+        <p class="mt-1 block w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400">
+            {{ $room->occupied_beds ?? 0 }} — updates automatically from allocations
+        </p>
     </div>
 </div>
 

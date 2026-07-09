@@ -61,6 +61,25 @@ class RoomController extends Controller
     }
 
     /**
+     * Display the specified resource.
+     */
+    public function show(Room $room): View
+    {
+        $room->load(['floor.block.hostel', 'roomType']);
+
+        $activeAllocations = $room->activeAllocations()->with('studentProfile.user')->get()->keyBy('bed_number');
+
+        return view('rooms.show', [
+            'room' => $room,
+            'beds' => collect(range(1, $room->capacity))->map(fn (int $bed) => [
+                'number' => $bed,
+                'allocation' => $activeAllocations->get($bed),
+            ]),
+            'history' => $room->allocations()->with('studentProfile.user')->latest('allocated_at')->paginate(10),
+        ]);
+    }
+
+    /**
      * Show the form for creating a new resource.
      */
     public function create(): View
@@ -108,6 +127,11 @@ class RoomController extends Controller
      */
     public function destroy(Room $room): RedirectResponse
     {
+        if ($room->allocations()->exists()) {
+            return redirect()->route('rooms.index')
+                ->with('error', "Cannot delete room \"{$room->room_number}\" while it has allocation history.");
+        }
+
         $room->delete();
 
         return redirect()->route('rooms.index')->with('status', 'Room deleted.');
