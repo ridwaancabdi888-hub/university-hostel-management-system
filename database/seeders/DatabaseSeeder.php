@@ -42,6 +42,7 @@ class DatabaseSeeder extends Seeder
             RoomInventorySeeder::class,
             StudentSeeder::class,
             AllocationSeeder::class,
+            InvoiceSeeder::class,
         ]);
     }
 }

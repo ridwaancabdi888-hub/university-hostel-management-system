@@ -1,0 +1,223 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Enums\InvoiceStatus;
+use App\Http\Requests\GenerateBillsRequest;
+use App\Http\Requests\InvoiceRequest;
+use App\Models\Invoice;
+use App\Models\StudentProfile;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\View\View;
+
+class InvoiceController extends Controller
+{
+    /**
+     * The flat amount added when applying a late fee to an overdue invoice.
+     */
+    private const LATE_FEE_INCREMENT = 25.00;
+
+    /**
+     * Display the billing history.
+     */
+    public function index(Request $request): View
+    {
+        $query = Invoice::with(['studentProfile.user']);
+
+        if ($search = $request->string('search')->trim()->toString()) {
+            $query->where(function ($query) use ($search) {
+                $query->where('invoice_number', 'like', "%{$search}%")
+                    ->orWhereHas('studentProfile', fn ($q) => $q->where('student_id', 'like', "%{$search}%"))
+                    ->orWhereHas('studentProfile.user', fn ($q) => $q->where('name', 'like', "%{$search}%"));
+            });
+        }
+
+        match ($request->string('status')->toString()) {
+            'overdue' => $query->overdue(),
+            'unpaid' => $query->where('status', InvoiceStatus::Unpaid),
+            'paid' => $query->where('status', InvoiceStatus::Paid),
+            'cancelled' => $query->where('status', InvoiceStatus::Cancelled),
+            default => null,
+        };
+
+        $invoices = $query->latest('billing_month')->paginate(20)->withQueryString();
+
+        return view('invoices.index', [
+            'invoices' => $invoices,
+            'filters' => $request->only(['search', 'status']),
+        ]);
+    }
+
+    /**
+     * Show the form for creating a one-off invoice.
+     */
+    public function create(): View
+    {
+        return view('invoices.create', [
+            'students' => StudentProfile::with('user')->orderBy('student_id')->get(),
+        ]);
+    }
+
+    /**
+     * Store a newly created invoice.
+     */
+    public function store(InvoiceRequest $request): RedirectResponse
+    {
+        $data = $request->validated();
+
+        $student = StudentProfile::findOrFail($data['student_profile_id']);
+
+        $invoice = Invoice::create([
+            ...$data,
+            'billing_month' => Carbon::parse($data['billing_month'])->startOfMonth(),
+            'room_allocation_id' => $student->activeAllocation?->id,
+            'status' => InvoiceStatus::Unpaid,
+        ]);
+
+        return redirect()->route('invoices.show', $invoice)->with('status', 'Invoice created.');
+    }
+
+    /**
+     * Display the specified invoice.
+     */
+    public function show(Invoice $invoice): View
+    {
+        $invoice->load(['studentProfile.user', 'roomAllocation.room.floor.block.hostel']);
+
+        return view('invoices.show', [
+            'invoice' => $invoice,
+        ]);
+    }
+
+    /**
+     * Show the form for editing the specified invoice.
+     */
+    public function edit(Invoice $invoice): View
+    {
+        $invoice->load('studentProfile.user');
+
+        return view('invoices.edit', [
+            'invoice' => $invoice,
+        ]);
+    }
+
+    /**
+     * Update the specified invoice's charges, due date, status, and notes.
+     */
+    public function update(InvoiceRequest $request, Invoice $invoice): RedirectResponse
+    {
+        $invoice->update($request->validated());
+
+        return redirect()->route('invoices.show', $invoice)->with('status', 'Invoice updated.');
+    }
+
+    /**
+     * Remove the specified invoice, unless it has already been paid.
+     */
+    public function destroy(Invoice $invoice): RedirectResponse
+    {
+        if ($invoice->status === InvoiceStatus::Paid) {
+            return redirect()->route('invoices.index')
+                ->with('error', "Cannot delete invoice \"{$invoice->invoice_number}\" because it has already been paid.");
+        }
+
+        $invoice->delete();
+
+        return redirect()->route('invoices.index')->with('status', 'Invoice deleted.');
+    }
+
+    /**
+     * Show the form for generating monthly bills.
+     */
+    public function generateForm(): View
+    {
+        return view('invoices.generate');
+    }
+
+    /**
+     * Generate one invoice per actively-housed student for the given month,
+     * skipping any student who already has a bill for that month.
+     */
+    public function generate(GenerateBillsRequest $request): RedirectResponse
+    {
+        $data = $request->validated();
+        $billingMonth = Carbon::createFromFormat('Y-m', $data['billing_month'])->startOfMonth();
+
+        $students = StudentProfile::with('activeAllocation.room.roomType')
+            ->whereHas('activeAllocation')
+            ->get();
+
+        $generated = 0;
+        $skipped = 0;
+
+        foreach ($students as $student) {
+            $alreadyBilled = Invoice::where('student_profile_id', $student->id)
+                ->where('billing_month', $billingMonth->toDateString())
+                ->exists();
+
+            if ($alreadyBilled) {
+                $skipped++;
+
+                continue;
+            }
+
+            Invoice::create([
+                'student_profile_id' => $student->id,
+                'room_allocation_id' => $student->activeAllocation->id,
+                'billing_month' => $billingMonth,
+                'rent_amount' => $student->activeAllocation->room->roomType->monthly_rate,
+                'utility_amount' => $data['utility_amount'] ?? 0,
+                'due_date' => $data['due_date'],
+                'status' => InvoiceStatus::Unpaid,
+            ]);
+
+            $generated++;
+        }
+
+        return redirect()->route('invoices.index')
+            ->with('status', "Generated {$generated} invoice(s) for {$billingMonth->format('F Y')}.".($skipped ? " Skipped {$skipped} student(s) already billed." : ''));
+    }
+
+    /**
+     * Mark an invoice as paid.
+     */
+    public function markPaid(Invoice $invoice): RedirectResponse
+    {
+        $invoice->update([
+            'status' => InvoiceStatus::Paid,
+            'paid_at' => now(),
+        ]);
+
+        return redirect()->route('invoices.show', $invoice)->with('status', 'Invoice marked as paid.');
+    }
+
+    /**
+     * Apply a flat late fee to an overdue invoice.
+     */
+    public function applyLateFee(Invoice $invoice): RedirectResponse
+    {
+        if (! $invoice->isOverdue()) {
+            return redirect()->route('invoices.show', $invoice)->with('error', 'Late fees can only be applied to overdue invoices.');
+        }
+
+        $invoice->update([
+            'late_fee_amount' => $invoice->late_fee_amount + self::LATE_FEE_INCREMENT,
+        ]);
+
+        return redirect()->route('invoices.show', $invoice)->with('status', 'Late fee applied.');
+    }
+
+    /**
+     * Download the invoice as a PDF.
+     */
+    public function pdf(Invoice $invoice)
+    {
+        $invoice->load(['studentProfile.user', 'roomAllocation.room.floor.block.hostel']);
+
+        return Pdf::loadView('invoices.pdf', ['invoice' => $invoice])
+            ->download("{$invoice->invoice_number}.pdf");
+    }
+}

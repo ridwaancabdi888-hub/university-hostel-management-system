@@ -14,6 +14,7 @@
                 <tr>
                     <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Name</th>
                     <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Default Capacity</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Monthly Rent</th>
                     <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Rooms Using It</th>
                     <th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Actions</th>
                 </tr>
@@ -23,6 +24,7 @@
                     <tr>
                         <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">{{ $roomType->name }}</td>
                         <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $roomType->default_capacity }} beds</td>
+                        <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">${{ number_format($roomType->monthly_rate, 2) }}</td>
                         <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $roomType->rooms_count }}</td>
                         <td class="px-4 py-3 text-right text-sm">
                             <a href="{{ route('room-types.edit', $roomType) }}" class="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">Edit</a>
@@ -32,7 +34,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="4" class="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">No room types yet.</td>
+                        <td colspan="5" class="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">No room types yet.</td>
                     </tr>
                 @endforelse
             </tbody>

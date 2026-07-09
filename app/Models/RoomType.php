@@ -10,6 +10,7 @@ class RoomType extends Model
     protected $fillable = [
         'name',
         'default_capacity',
+        'monthly_rate',
         'description',
     ];
 
@@ -17,6 +18,7 @@ class RoomType extends Model
     {
         return [
             'default_capacity' => 'integer',
+            'monthly_rate' => 'decimal:2',
         ];
     }
 

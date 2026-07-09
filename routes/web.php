@@ -3,9 +3,9 @@
 use App\Http\Controllers\AllocationController;
 use App\Http\Controllers\BlockController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\FinancialsController;
 use App\Http\Controllers\FloorController;
 use App\Http\Controllers\HostelController;
+use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoomController;
@@ -52,8 +52,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/maintenance', [MaintenanceController::class, 'index'])->name('maintenance');
     });
 
+    // The "create"/"generate" routes must be registered before the
+    // "{invoice}" wildcard routes below, otherwise they're matched as an
+    // invoice ID.
     Route::middleware('role:admin,accountant')->group(function () {
-        Route::get('/financials', [FinancialsController::class, 'index'])->name('financials');
+        Route::get('/invoices/create', [InvoiceController::class, 'create'])->name('invoices.create');
+        Route::post('/invoices', [InvoiceController::class, 'store'])->name('invoices.store');
+        Route::get('/invoices/generate', [InvoiceController::class, 'generateForm'])->name('invoices.generate.form');
+        Route::post('/invoices/generate', [InvoiceController::class, 'generate'])->name('invoices.generate');
+
+        Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
+        Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
+        Route::get('/invoices/{invoice}/edit', [InvoiceController::class, 'edit'])->name('invoices.edit');
+        Route::put('/invoices/{invoice}', [InvoiceController::class, 'update'])->name('invoices.update');
+        Route::delete('/invoices/{invoice}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
+        Route::post('/invoices/{invoice}/mark-paid', [InvoiceController::class, 'markPaid'])->name('invoices.mark-paid');
+        Route::post('/invoices/{invoice}/apply-late-fee', [InvoiceController::class, 'applyLateFee'])->name('invoices.apply-late-fee');
+        Route::get('/invoices/{invoice}/pdf', [InvoiceController::class, 'pdf'])->name('invoices.pdf');
     });
 });
 

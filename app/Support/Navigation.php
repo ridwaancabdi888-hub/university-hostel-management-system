@@ -42,7 +42,8 @@ class Navigation
             ],
             [
                 'label' => 'Financials',
-                'route' => 'financials',
+                'route' => 'invoices.index',
+                'active' => ['invoices.*'],
                 'icon' => 'banknotes',
                 'roles' => [Role::Admin, Role::Accountant],
             ],

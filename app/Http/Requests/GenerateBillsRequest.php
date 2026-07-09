@@ -4,9 +4,8 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
-class RoomTypeRequest extends FormRequest
+class GenerateBillsRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,10 +23,9 @@ class RoomTypeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255', Rule::unique('room_types', 'name')->ignore($this->route('room_type'))],
-            'default_capacity' => ['required', 'integer', 'min:1', 'max:20'],
-            'monthly_rate' => ['required', 'numeric', 'min:0', 'max:99999.99'],
-            'description' => ['nullable', 'string', 'max:1000'],
+            'billing_month' => ['required', 'date_format:Y-m'],
+            'due_date' => ['required', 'date'],
+            'utility_amount' => ['nullable', 'numeric', 'min:0', 'max:99999.99'],
         ];
     }
 }
