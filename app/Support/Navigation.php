@@ -51,9 +51,16 @@ class Navigation
             [
                 'label' => 'Financials',
                 'route' => 'invoices.index',
-                'active' => ['invoices.*', 'payments.*', 'reports.*'],
+                'active' => ['invoices.*', 'payments.*'],
                 'icon' => 'banknotes',
                 'roles' => [Role::Admin, Role::Accountant],
+            ],
+            [
+                'label' => 'Reports',
+                'route' => 'reports.index',
+                'active' => ['reports.*'],
+                'icon' => 'chart-bar',
+                'roles' => [Role::Admin, Role::Warden, Role::Accountant],
             ],
         ];
     }

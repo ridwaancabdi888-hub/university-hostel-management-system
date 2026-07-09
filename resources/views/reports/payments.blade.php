@@ -1,5 +1,10 @@
-<x-dashboard-layout title="Payment Reports">
-    <x-financial-tabs active="reports" />
+<x-dashboard-layout title="Payment Report">
+    <x-reports-tabs active="payments" />
+
+    <div class="mb-6 flex items-center justify-between">
+        <p class="text-sm text-gray-500 dark:text-gray-400">Daily and monthly income, pending balances, and every recorded payment.</p>
+        <x-report-export-buttons type="payments" />
+    </div>
 
     <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div class="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
@@ -14,6 +19,22 @@
             <p class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Outstanding Balance</p>
             <p class="mt-2 text-2xl font-semibold text-amber-600 dark:text-amber-400">${{ number_format($pendingBalance, 2) }}</p>
             <a href="{{ route('invoices.index', ['status' => 'pending']) }}" class="mt-1 inline-block text-xs font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">View pending payments &rarr;</a>
+        </div>
+    </div>
+
+    <div class="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div class="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800 lg:col-span-2">
+            <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Monthly Income Trend</h3>
+            <div class="mt-4">
+                <canvas id="monthlyIncomeChart" height="90"></canvas>
+            </div>
+        </div>
+
+        <div class="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+            <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">By Payment Method</h3>
+            <div class="mt-4">
+                <canvas id="methodChart" height="200"></canvas>
+            </div>
         </div>
     </div>
 
@@ -73,7 +94,7 @@
         </div>
     </div>
 
-    <form method="GET" action="{{ route('reports.index') }}" class="mb-6 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+    <form method="GET" action="{{ route('reports.payments') }}" class="mb-6 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div>
                 <x-input-label for="date_from" value="From" />
@@ -85,7 +106,7 @@
             </div>
             <div class="flex items-end">
                 <x-primary-button type="submit">Apply Range</x-primary-button>
-                <a href="{{ route('reports.index') }}" class="ml-3 text-sm font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">Reset</a>
+                <a href="{{ route('reports.payments') }}" class="ml-3 text-sm font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">Reset</a>
             </div>
         </div>
     </form>
@@ -128,4 +149,42 @@
     <div class="mt-4">
         {{ $payments->links() }}
     </div>
+
+    @push('scripts')
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+        <script>
+            const monthlyLabels = {!! $monthlyIncome->reverse()->values()->map(fn ($r) => \Illuminate\Support\Carbon::createFromFormat('Y-m', $r->month)->format('M Y'))->toJson() !!};
+            const monthlyTotals = {!! $monthlyIncome->reverse()->values()->pluck('total')->toJson() !!};
+
+            new Chart(document.getElementById('monthlyIncomeChart'), {
+                type: 'line',
+                data: {
+                    labels: monthlyLabels,
+                    datasets: [{
+                        label: 'Income',
+                        data: monthlyTotals,
+                        borderColor: '#4f46e5',
+                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                        tension: 0.3,
+                        fill: true,
+                    }],
+                },
+                options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } },
+            });
+
+            const methodLabels = {!! $byMethod->map(fn ($r) => \App\Enums\PaymentMethod::from($r->payment_method)->label())->toJson() !!};
+            const methodTotals = {!! $byMethod->pluck('total')->toJson() !!};
+
+            new Chart(document.getElementById('methodChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: methodLabels,
+                    datasets: [{
+                        data: methodTotals,
+                        backgroundColor: ['#4f46e5', '#0ea5e9', '#f59e0b', '#10b981', '#ec4899'],
+                    }],
+                },
+            });
+        </script>
+    @endpush
 </x-dashboard-layout>

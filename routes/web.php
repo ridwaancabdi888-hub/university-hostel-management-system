@@ -91,8 +91,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/invoices/{invoice}/payments', [PaymentController::class, 'store'])->name('payments.store');
         Route::delete('/payments/{payment}', [PaymentController::class, 'destroy'])->name('payments.destroy');
         Route::get('/payments/{payment}/receipt', [PaymentController::class, 'receipt'])->name('payments.receipt');
+    });
 
+    // Reports Center — each report page/export additionally checks the
+    // current role against ReportController::REPORTS_BY_ROLE.
+    Route::middleware('role:admin,warden,accountant')->group(function () {
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+        Route::get('/reports/occupancy', [ReportController::class, 'occupancy'])->name('reports.occupancy');
+        Route::get('/reports/billing', [ReportController::class, 'billing'])->name('reports.billing');
+        Route::get('/reports/payments', [ReportController::class, 'payments'])->name('reports.payments');
+        Route::get('/reports/students', [ReportController::class, 'students'])->name('reports.students');
+        Route::get('/reports/hostels', [ReportController::class, 'hostels'])->name('reports.hostels');
+
+        Route::get('/reports/{type}/pdf', [ReportController::class, 'exportPdf'])
+            ->where('type', 'occupancy|billing|payments|students|hostels')
+            ->name('reports.pdf');
+        Route::get('/reports/{type}/excel', [ReportController::class, 'exportExcel'])
+            ->where('type', 'occupancy|billing|payments|students|hostels')
+            ->name('reports.excel');
     });
 
     // The "create" route must be registered before the "{visitor}" wildcard

@@ -1,10 +1,16 @@
 @props(['active'])
 
 @php
-    $tabs = [
-        'invoices' => ['label' => 'Billing History', 'route' => 'invoices.index'],
-        'reports' => ['label' => 'Payment Reports', 'route' => 'reports.payments'],
+    $allTabs = [
+        'occupancy' => ['label' => 'Occupancy', 'route' => 'reports.occupancy'],
+        'billing' => ['label' => 'Billing', 'route' => 'reports.billing'],
+        'payments' => ['label' => 'Payments', 'route' => 'reports.payments'],
+        'students' => ['label' => 'Students', 'route' => 'reports.students'],
+        'hostels' => ['label' => 'Hostels', 'route' => 'reports.hostels'],
     ];
+
+    $accessible = \App\Support\ReportAccess::for(auth()->user()->role);
+    $tabs = collect($allTabs)->only($accessible);
 @endphp
 
 <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
