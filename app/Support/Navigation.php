@@ -29,7 +29,8 @@ class Navigation
             ],
             [
                 'label' => 'Student Directory',
-                'route' => 'student-directory',
+                'route' => 'students.index',
+                'active' => ['students.*'],
                 'icon' => 'users',
                 'roles' => [Role::Admin, Role::Warden, Role::Accountant],
             ],

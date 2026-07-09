@@ -9,7 +9,7 @@ use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\RoomTypeController;
-use App\Http\Controllers\StudentDirectoryController;
+use App\Http\Controllers\StudentController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -27,8 +27,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('room-types', RoomTypeController::class)->except('show');
     });
 
+    // The "create" route must be registered before the "{student}" wildcard
+    // routes below, otherwise "create" is matched as a student ID.
+    Route::middleware('role:admin,warden')->group(function () {
+        Route::resource('students', StudentController::class)->except(['index', 'show']);
+    });
+
     Route::middleware('role:admin,warden,accountant')->group(function () {
-        Route::get('/student-directory', [StudentDirectoryController::class, 'index'])->name('student-directory');
+        Route::resource('students', StudentController::class)->only(['index', 'show']);
     });
 
     Route::middleware('role:admin,warden,student')->group(function () {

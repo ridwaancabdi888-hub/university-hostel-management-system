@@ -43,6 +43,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RoomTypeSeeder::class,
             RoomInventorySeeder::class,
+            StudentSeeder::class,
         ]);
     }
 }
