@@ -4,12 +4,17 @@ namespace App\Models;
 
 use App\Enums\AllocationStatus;
 use App\Enums\RoomStatus;
+use Database\Factories\RoomFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Room extends Model
 {
+    /** @use HasFactory<RoomFactory> */
+    use HasFactory;
+
     protected $fillable = [
         'floor_id',
         'room_type_id',

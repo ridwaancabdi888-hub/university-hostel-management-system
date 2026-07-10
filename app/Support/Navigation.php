@@ -62,6 +62,13 @@ class Navigation
                 'icon' => 'chart-bar',
                 'roles' => [Role::Admin, Role::Warden, Role::Accountant],
             ],
+            [
+                'label' => 'Activity Log',
+                'route' => 'activity-log.index',
+                'active' => ['activity-log.*'],
+                'icon' => 'settings',
+                'roles' => [Role::Admin],
+            ],
         ];
     }
 

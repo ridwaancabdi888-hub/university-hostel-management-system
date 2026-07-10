@@ -20,6 +20,7 @@ use App\Support\ReportAccess;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
@@ -131,40 +132,42 @@ class ReportController extends Controller
      */
     private function occupancyData(): array
     {
-        $rooms = Room::all();
-        $totalRooms = $rooms->count();
-        $totalCapacity = (int) $rooms->sum('capacity');
-        $totalOccupied = (int) $rooms->sum('occupied_beds');
-        $occupancyRate = $totalCapacity > 0 ? round($totalOccupied / $totalCapacity * 100, 1) : 0;
+        return Cache::remember('reports.occupancy', now()->addMinutes(5), function () {
+            $rooms = Room::all();
+            $totalRooms = $rooms->count();
+            $totalCapacity = (int) $rooms->sum('capacity');
+            $totalOccupied = (int) $rooms->sum('occupied_beds');
+            $occupancyRate = $totalCapacity > 0 ? round($totalOccupied / $totalCapacity * 100, 1) : 0;
 
-        $byHostel = Hostel::with('blocks.floors.rooms')->get()->map(function (Hostel $hostel) {
-            $rooms = $hostel->blocks->flatMap->floors->flatMap->rooms;
-            $capacity = (int) $rooms->sum('capacity');
-            $occupied = (int) $rooms->sum('occupied_beds');
+            $byHostel = Hostel::with('blocks.floors.rooms')->get()->map(function (Hostel $hostel) {
+                $rooms = $hostel->blocks->flatMap->floors->flatMap->rooms;
+                $capacity = (int) $rooms->sum('capacity');
+                $occupied = (int) $rooms->sum('occupied_beds');
 
-            return [
-                'name' => $hostel->name,
-                'rooms' => $rooms->count(),
-                'capacity' => $capacity,
-                'occupied' => $occupied,
-                'rate' => $capacity > 0 ? round($occupied / $capacity * 100, 1) : 0,
-            ];
-        })->values();
+                return [
+                    'name' => $hostel->name,
+                    'rooms' => $rooms->count(),
+                    'capacity' => $capacity,
+                    'occupied' => $occupied,
+                    'rate' => $capacity > 0 ? round($occupied / $capacity * 100, 1) : 0,
+                ];
+            })->values();
 
-        $byRoomType = RoomType::with('rooms')->get()->map(function (RoomType $type) {
-            $capacity = (int) $type->rooms->sum('capacity');
-            $occupied = (int) $type->rooms->sum('occupied_beds');
+            $byRoomType = RoomType::with('rooms')->get()->map(function (RoomType $type) {
+                $capacity = (int) $type->rooms->sum('capacity');
+                $occupied = (int) $type->rooms->sum('occupied_beds');
 
-            return [
-                'name' => $type->name,
-                'rooms' => $type->rooms->count(),
-                'capacity' => $capacity,
-                'occupied' => $occupied,
-                'rate' => $capacity > 0 ? round($occupied / $capacity * 100, 1) : 0,
-            ];
-        })->values();
+                return [
+                    'name' => $type->name,
+                    'rooms' => $type->rooms->count(),
+                    'capacity' => $capacity,
+                    'occupied' => $occupied,
+                    'rate' => $capacity > 0 ? round($occupied / $capacity * 100, 1) : 0,
+                ];
+            })->values();
 
-        return compact('totalRooms', 'totalCapacity', 'totalOccupied', 'occupancyRate', 'byHostel', 'byRoomType');
+            return compact('totalRooms', 'totalCapacity', 'totalOccupied', 'occupancyRate', 'byHostel', 'byRoomType');
+        });
     }
 
     /**
@@ -218,11 +221,19 @@ class ReportController extends Controller
             ->get()
             ->sum(fn (Invoice $invoice) => $invoice->balance());
 
-        $monthlyIncome = Payment::selectRaw("DATE_FORMAT(paid_at, '%Y-%m') as month, SUM(amount) as total, COUNT(*) as payment_count")
-            ->groupBy('month')
-            ->orderByDesc('month')
-            ->limit(12)
-            ->get();
+        // Grouped in PHP (rather than a DATE_FORMAT(...) raw query) so this
+        // works identically on MySQL and SQLite (the test suite's driver).
+        $monthlyIncome = Payment::select('paid_at', 'amount')
+            ->where('paid_at', '>=', now()->subMonths(11)->startOfMonth())
+            ->get()
+            ->groupBy(fn (Payment $payment) => $payment->paid_at->format('Y-m'))
+            ->map(fn ($payments, $month) => (object) [
+                'month' => $month,
+                'total' => $payments->sum('amount'),
+                'payment_count' => $payments->count(),
+            ])
+            ->sortByDesc('month')
+            ->values();
 
         $dailyIncome = Payment::selectRaw('paid_at as day, SUM(amount) as total, COUNT(*) as payment_count')
             ->whereBetween('paid_at', [$dateFrom, $dateTo])
@@ -261,14 +272,16 @@ class ReportController extends Controller
      */
     private function studentsData(): array
     {
-        $total = StudentProfile::count();
+        return Cache::remember('reports.students', now()->addMinutes(5), function () {
+            $total = StudentProfile::count();
 
-        $byStatus = DB::table('student_profiles')->select('status', DB::raw('COUNT(*) as count'))->groupBy('status')->get();
-        $byYearLevel = DB::table('student_profiles')->select('year_level', DB::raw('COUNT(*) as count'))->groupBy('year_level')->get();
-        $byGender = DB::table('student_profiles')->select('gender', DB::raw('COUNT(*) as count'))->groupBy('gender')->get();
-        $byCourse = DB::table('student_profiles')->select('course', DB::raw('COUNT(*) as count'))->groupBy('course')->orderByDesc('count')->get();
+            $byStatus = DB::table('student_profiles')->select('status', DB::raw('COUNT(*) as count'))->groupBy('status')->get();
+            $byYearLevel = DB::table('student_profiles')->select('year_level', DB::raw('COUNT(*) as count'))->groupBy('year_level')->get();
+            $byGender = DB::table('student_profiles')->select('gender', DB::raw('COUNT(*) as count'))->groupBy('gender')->get();
+            $byCourse = DB::table('student_profiles')->select('course', DB::raw('COUNT(*) as count'))->groupBy('course')->orderByDesc('count')->get();
 
-        return compact('total', 'byStatus', 'byYearLevel', 'byGender', 'byCourse');
+            return compact('total', 'byStatus', 'byYearLevel', 'byGender', 'byCourse');
+        });
     }
 
     /**
@@ -276,32 +289,48 @@ class ReportController extends Controller
      */
     private function hostelsData(): array
     {
-        $hostels = Hostel::with('blocks.floors.rooms')->get()->map(function (Hostel $hostel) {
-            $rooms = $hostel->blocks->flatMap->floors->flatMap->rooms;
-            $capacity = (int) $rooms->sum('capacity');
-            $occupied = (int) $rooms->sum('occupied_beds');
-            $roomIds = $rooms->pluck('id');
+        return Cache::remember('reports.hostels', now()->addMinutes(5), function () {
+            $hostels = Hostel::with('blocks.floors.rooms')->get();
 
-            $revenue = Invoice::whereHas('roomAllocation', fn ($q) => $q->whereIn('room_id', $roomIds))
-                ->where('status', '!=', InvoiceStatus::Cancelled)
-                ->sum('total_amount');
+            // A room -> hostel lookup built once from the already-eager-loaded
+            // tree above, so revenue/maintenance can be aggregated in a single
+            // query each below instead of two extra queries per hostel.
+            $roomHostelMap = $hostels->flatMap(
+                fn (Hostel $hostel) => $hostel->blocks->flatMap->floors->flatMap->rooms
+                    ->map(fn (Room $room) => ['room_id' => $room->id, 'hostel_id' => $hostel->id])
+            )->pluck('hostel_id', 'room_id');
 
-            $activeMaintenance = MaintenanceRequest::whereIn('room_id', $roomIds)
-                ->where('status', '!=', MaintenanceStatus::Completed)
-                ->count();
+            $revenueByHostel = Invoice::where('status', '!=', InvoiceStatus::Cancelled)
+                ->whereHas('roomAllocation')
+                ->with('roomAllocation:id,room_id')
+                ->get(['id', 'total_amount', 'room_allocation_id'])
+                ->groupBy(fn (Invoice $invoice) => $roomHostelMap->get($invoice->roomAllocation?->room_id))
+                ->map(fn ($invoices) => (float) $invoices->sum('total_amount'));
 
-            return [
-                'name' => $hostel->name,
-                'blocks' => $hostel->blocks->count(),
-                'rooms' => $rooms->count(),
-                'capacity' => $capacity,
-                'occupied' => $occupied,
-                'rate' => $capacity > 0 ? round($occupied / $capacity * 100, 1) : 0,
-                'revenue' => (float) $revenue,
-                'activeMaintenance' => $activeMaintenance,
-            ];
-        })->values();
+            $maintenanceByHostel = MaintenanceRequest::where('status', '!=', MaintenanceStatus::Completed)
+                ->whereNotNull('room_id')
+                ->get(['id', 'room_id'])
+                ->groupBy(fn (MaintenanceRequest $request) => $roomHostelMap->get($request->room_id))
+                ->map->count();
 
-        return ['hostels' => $hostels];
+            $result = $hostels->map(function (Hostel $hostel) use ($revenueByHostel, $maintenanceByHostel) {
+                $rooms = $hostel->blocks->flatMap->floors->flatMap->rooms;
+                $capacity = (int) $rooms->sum('capacity');
+                $occupied = (int) $rooms->sum('occupied_beds');
+
+                return [
+                    'name' => $hostel->name,
+                    'blocks' => $hostel->blocks->count(),
+                    'rooms' => $rooms->count(),
+                    'capacity' => $capacity,
+                    'occupied' => $occupied,
+                    'rate' => $capacity > 0 ? round($occupied / $capacity * 100, 1) : 0,
+                    'revenue' => (float) ($revenueByHostel->get($hostel->id) ?? 0),
+                    'activeMaintenance' => (int) ($maintenanceByHostel->get($hostel->id) ?? 0),
+                ];
+            })->values();
+
+            return ['hostels' => $result];
+        });
     }
 }

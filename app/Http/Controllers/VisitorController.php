@@ -90,7 +90,7 @@ class VisitorController extends Controller
      */
     public function show(Request $request, Visitor $visitor): View
     {
-        $this->authorizeAccess($request, $visitor);
+        $this->authorize('view', $visitor);
 
         $visitor->load(['studentProfile.user', 'approvedBy']);
 
@@ -104,8 +104,7 @@ class VisitorController extends Controller
      */
     public function edit(Request $request, Visitor $visitor): View
     {
-        $this->authorizeAccess($request, $visitor);
-        $this->authorizeEdit($request, $visitor);
+        $this->authorize('update', $visitor);
 
         return view('visitors.edit', [
             'visitor' => $visitor,
@@ -117,8 +116,7 @@ class VisitorController extends Controller
      */
     public function update(VisitorRequest $request, Visitor $visitor): RedirectResponse
     {
-        $this->authorizeAccess($request, $visitor);
-        $this->authorizeEdit($request, $visitor);
+        $this->authorize('update', $visitor);
 
         $data = $request->validated();
 
@@ -139,6 +137,8 @@ class VisitorController extends Controller
      */
     public function approve(Request $request, Visitor $visitor): RedirectResponse
     {
+        $this->authorize('approve', $visitor);
+
         $visitor->update([
             'status' => VisitorStatus::Approved,
             'approved_by' => $request->user()->id,
@@ -156,6 +156,8 @@ class VisitorController extends Controller
      */
     public function reject(RejectVisitorRequest $request, Visitor $visitor): RedirectResponse
     {
+        $this->authorize('reject', $visitor);
+
         $visitor->update([
             'status' => VisitorStatus::Rejected,
             'approved_by' => $request->user()->id,
@@ -166,34 +168,5 @@ class VisitorController extends Controller
         $visitor->studentProfile->user->notify(new VisitorRejected($visitor));
 
         return redirect()->route('visitors.show', $visitor)->with('status', 'Visitor rejected.');
-    }
-
-    /**
-     * A student may only see their own visitor registrations; staff may
-     * see all.
-     */
-    private function authorizeAccess(Request $request, Visitor $visitor): void
-    {
-        $user = $request->user();
-
-        abort_if(
-            $user->hasRole(Role::Student) && $visitor->studentProfile->user_id !== $user->id,
-            403
-        );
-    }
-
-    /**
-     * A student may only edit their own registration while it's still
-     * pending; staff may edit at any stage.
-     */
-    private function authorizeEdit(Request $request, Visitor $visitor): void
-    {
-        $user = $request->user();
-
-        abort_if(
-            $user->hasRole(Role::Student) && $visitor->status !== VisitorStatus::Pending,
-            403,
-            'This registration can no longer be edited.'
-        );
     }
 }

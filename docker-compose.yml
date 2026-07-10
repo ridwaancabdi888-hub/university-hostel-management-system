@@ -1,0 +1,59 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DB_HOST: mysql
+    volumes:
+      - storage_data:/var/www/html/storage/app
+      - app_public:/var/www/html/public
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - app_public:/var/www/html/public:ro
+    depends_on:
+      - app
+
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-hostel_management}
+      MYSQL_USER: ${DB_USERNAME:-hostel}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-secret}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Optional upgrade path if the app outgrows database-backed cache/session/
+  # queue (see config/cache.php, config/session.php, config/queue.php). Not
+  # required at this app's scale — uncomment and set CACHE_STORE=redis,
+  # SESSION_DRIVER=redis, QUEUE_CONNECTION=redis in .env to enable.
+  # redis:
+  #   image: redis:7-alpine
+  #   restart: unless-stopped
+  #   volumes:
+  #     - redis_data:/data
+
+volumes:
+  mysql_data:
+  storage_data:
+  app_public:
+  # redis_data:

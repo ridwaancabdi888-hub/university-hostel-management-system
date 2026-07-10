@@ -11,6 +11,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class InvoiceController extends Controller
@@ -75,14 +76,16 @@ class InvoiceController extends Controller
     {
         $data = $request->validated();
 
-        $student = StudentProfile::findOrFail($data['student_profile_id']);
+        $invoice = DB::transaction(function () use ($data) {
+            $student = StudentProfile::findOrFail($data['student_profile_id']);
 
-        $invoice = Invoice::create([
-            ...$data,
-            'billing_month' => Carbon::parse($data['billing_month'])->startOfMonth(),
-            'room_allocation_id' => $student->activeAllocation?->id,
-            'status' => InvoiceStatus::Unpaid,
-        ]);
+            return Invoice::create([
+                ...$data,
+                'billing_month' => Carbon::parse($data['billing_month'])->startOfMonth(),
+                'room_allocation_id' => $student->activeAllocation?->id,
+                'status' => InvoiceStatus::Unpaid,
+            ]);
+        });
 
         return redirect()->route('invoices.show', $invoice)->with('status', 'Invoice created.');
     }
@@ -158,36 +161,44 @@ class InvoiceController extends Controller
         $data = $request->validated();
         $billingMonth = Carbon::createFromFormat('Y-m', $data['billing_month'])->startOfMonth();
 
-        $students = StudentProfile::with('activeAllocation.room.roomType')
-            ->whereHas('activeAllocation')
-            ->get();
+        [$generated, $skipped] = DB::transaction(function () use ($data, $billingMonth) {
+            $students = StudentProfile::with('activeAllocation.room.roomType')
+                ->whereHas('activeAllocation')
+                ->get();
 
-        $generated = 0;
-        $skipped = 0;
+            // whereYear/whereMonth (rather than a plain string-equality
+            // where()) because the "date"-cast billing_month column can be
+            // stored with a time component depending on the DB driver
+            // (e.g. SQLite, unlike MySQL, doesn't truncate DATE columns).
+            $alreadyBilledIds = Invoice::whereYear('billing_month', $billingMonth->year)
+                ->whereMonth('billing_month', $billingMonth->month)
+                ->pluck('student_profile_id');
 
-        foreach ($students as $student) {
-            $alreadyBilled = Invoice::where('student_profile_id', $student->id)
-                ->where('billing_month', $billingMonth->toDateString())
-                ->exists();
+            $generated = 0;
+            $skipped = 0;
 
-            if ($alreadyBilled) {
-                $skipped++;
+            foreach ($students as $student) {
+                if ($alreadyBilledIds->contains($student->id)) {
+                    $skipped++;
 
-                continue;
+                    continue;
+                }
+
+                Invoice::create([
+                    'student_profile_id' => $student->id,
+                    'room_allocation_id' => $student->activeAllocation->id,
+                    'billing_month' => $billingMonth,
+                    'rent_amount' => $student->activeAllocation->room->roomType->monthly_rate,
+                    'utility_amount' => $data['utility_amount'] ?? 0,
+                    'due_date' => $data['due_date'],
+                    'status' => InvoiceStatus::Unpaid,
+                ]);
+
+                $generated++;
             }
 
-            Invoice::create([
-                'student_profile_id' => $student->id,
-                'room_allocation_id' => $student->activeAllocation->id,
-                'billing_month' => $billingMonth,
-                'rent_amount' => $student->activeAllocation->room->roomType->monthly_rate,
-                'utility_amount' => $data['utility_amount'] ?? 0,
-                'due_date' => $data['due_date'],
-                'status' => InvoiceStatus::Unpaid,
-            ]);
-
-            $generated++;
-        }
+            return [$generated, $skipped];
+        });
 
         return redirect()->route('invoices.index')
             ->with('status', "Generated {$generated} invoice(s) for {$billingMonth->format('F Y')}.".($skipped ? " Skipped {$skipped} student(s) already billed." : ''));

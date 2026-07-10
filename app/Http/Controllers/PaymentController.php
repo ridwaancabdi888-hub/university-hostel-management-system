@@ -7,6 +7,7 @@ use App\Models\Invoice;
 use App\Models\Payment;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 
 class PaymentController extends Controller
 {
@@ -15,10 +16,12 @@ class PaymentController extends Controller
      */
     public function store(PaymentRequest $request, Invoice $invoice): RedirectResponse
     {
-        $invoice->payments()->create([
-            ...$request->validated(),
-            'recorded_by' => $request->user()->id,
-        ]);
+        DB::transaction(function () use ($request, $invoice) {
+            $invoice->payments()->create([
+                ...$request->validated(),
+                'recorded_by' => $request->user()->id,
+            ]);
+        });
 
         return redirect()->route('invoices.show', $invoice)->with('status', 'Payment recorded.');
     }

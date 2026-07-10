@@ -3,11 +3,20 @@
 namespace App\Models;
 
 use App\Enums\VisitorStatus;
+use Database\Factories\VisitorFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Visitor extends Model
 {
+    /** @use HasFactory<VisitorFactory> */
+    use HasFactory;
+
+    use LogsActivity;
+
     protected $fillable = [
         'student_profile_id',
         'approved_by',
@@ -39,5 +48,13 @@ class Visitor extends Model
     public function approvedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['status', 'rejection_reason'])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
     }
 }

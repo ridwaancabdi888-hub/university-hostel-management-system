@@ -4,13 +4,22 @@ namespace App\Models;
 
 use App\Enums\PaymentMethod;
 use App\Observers\PaymentObserver;
+use Database\Factories\PaymentFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 #[ObservedBy(PaymentObserver::class)]
 class Payment extends Model
 {
+    /** @use HasFactory<PaymentFactory> */
+    use HasFactory;
+
+    use LogsActivity;
+
     protected $fillable = [
         'receipt_number',
         'invoice_id',
@@ -39,5 +48,13 @@ class Payment extends Model
     public function recordedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'recorded_by');
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['amount', 'payment_method', 'paid_at', 'reference_number'])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
     }
 }

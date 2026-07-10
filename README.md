@@ -1,59 +1,96 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# University Hostel Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A Laravel 12 application for running university hostel operations end to end: room inventory, student registration, room allocation, billing and payments, maintenance requests, visitor management, and a role-based reporting center — with production hardening (authorization policies, security headers, rate limiting, activity logging, and automated backups) built in.
 
-## About Laravel
+## Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Room Inventory** — hostels, blocks, floors, room types, and rooms with capacity/occupancy tracking.
+- **Student Registration** — student profiles, guardian and emergency contact details, document photo upload.
+- **Room Allocation** — allocate, transfer, and vacate beds with concurrency-safe locking so two staff members can't double-book the same bed.
+- **Billing & Invoicing** — monthly bill generation, late fees, PDF invoices, sequential invoice numbering.
+- **Payments** — record payments against invoices, auto-generated receipts (PDF), automatic invoice status sync.
+- **Maintenance Requests** — students file tickets, staff triage/assign/resolve, with a full status history and a verification step where the student confirms the fix.
+- **Visitor Management** — students register visitors, staff approve or reject, with notifications (database, mail, SMS-ready) at each step.
+- **Reports Center** — occupancy, billing, payments, students, and hostel reports, each with charts, PDF export, and Excel export, scoped per role.
+- **Role-Based Access Control** — four roles (Admin, Warden, Accountant, Student), enforced through route middleware and Laravel Policies for per-record ownership checks.
+- **Activity Log** — an admin-only audit trail of who changed what, powered by `spatie/laravel-activitylog`.
+- **Automated Backups** — scheduled database + file backups with health monitoring, powered by `spatie/laravel-backup`.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Tech Stack
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Backend**: PHP 8.2, Laravel 12
+- **Frontend**: Blade, Tailwind CSS, Alpine.js, Vite
+- **Database**: MySQL
+- **PDF/Excel**: `barryvdh/laravel-dompdf`, `maatwebsite/excel`
+- **Testing**: PHPUnit (SQLite in-memory for the test suite)
 
-## Learning Laravel
+## Getting Started
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### Option A — Local (PHP/Composer/Node installed)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```bash
+composer install
+cp .env.example .env
+php artisan key:generate
+```
 
-## Laravel Sponsors
+Set your database credentials in `.env`, then:
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```bash
+php artisan migrate --seed
+npm install
+npm run build   # or `npm run dev` for a hot-reloading dev build
+php artisan serve
+```
 
-### Premium Partners
+Visit `http://localhost:8000`.
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Option B — Docker
 
-## Contributing
+```bash
+cp .env.example .env
+docker compose up -d --build
+docker compose exec app php artisan key:generate
+docker compose exec app php artisan migrate --seed
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Visit `http://localhost:8000`. See [DEPLOYMENT.md](DEPLOYMENT.md) for the production variant of this setup.
 
-## Code of Conduct
+### Demo Accounts
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+The seeder creates one account per role (password: `password` for all):
 
-## Security Vulnerabilities
+| Role       | Email                    |
+|------------|--------------------------|
+| Admin      | admin@hostel.test        |
+| Warden     | warden@hostel.test       |
+| Accountant | accountant@hostel.test   |
+| Student    | student@hostel.test      |
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Testing
+
+```bash
+composer test
+# or directly:
+php artisan test
+```
+
+The suite covers route-level RBAC boundaries, Policy-based ownership rules, the invoice/payment/allocation business logic (including the observers that generate sequential invoice/receipt numbers), and role-gated report access — run entirely against an in-memory SQLite database, no MySQL required.
+
+Code style is enforced with [Laravel Pint](https://laravel.com/docs/pint):
+
+```bash
+vendor/bin/pint
+```
+
+## Security
+
+See [SECURITY.md](SECURITY.md) for the responsible-disclosure policy and a summary of the security measures in place (CSP, rate limiting, security headers, Policy-based authorization).
+
+## Deployment
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for production `.env` configuration, caching, queue/scheduler setup, and the backup/restore procedure.
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Licensed under the [MIT license](LICENSE).

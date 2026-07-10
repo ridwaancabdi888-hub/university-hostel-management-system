@@ -92,7 +92,7 @@ class MaintenanceRequestController extends Controller
      */
     public function show(Request $request, MaintenanceRequest $ticket): View
     {
-        $this->authorizeAccess($request, $ticket);
+        $this->authorize('view', $ticket);
 
         $ticket->load(['studentProfile.user', 'room.floor.block.hostel', 'assignedStaff', 'comments.user', 'statusLogs.changedBy']);
 
@@ -107,8 +107,7 @@ class MaintenanceRequestController extends Controller
      */
     public function edit(Request $request, MaintenanceRequest $ticket): View
     {
-        $this->authorizeAccess($request, $ticket);
-        $this->authorizeEdit($request, $ticket);
+        $this->authorize('update', $ticket);
 
         return view('maintenance.edit', [
             'ticket' => $ticket,
@@ -120,8 +119,7 @@ class MaintenanceRequestController extends Controller
      */
     public function update(MaintenanceRequestRequest $request, MaintenanceRequest $ticket): RedirectResponse
     {
-        $this->authorizeAccess($request, $ticket);
-        $this->authorizeEdit($request, $ticket);
+        $this->authorize('update', $ticket);
 
         $data = $request->validated();
 
@@ -140,6 +138,8 @@ class MaintenanceRequestController extends Controller
      */
     public function assign(AssignStaffRequest $request, MaintenanceRequest $ticket): RedirectResponse
     {
+        $this->authorize('assign', $ticket);
+
         $assignedTo = $request->validated()['assigned_to'];
 
         $ticket->update(['assigned_to' => $assignedTo]);
@@ -157,7 +157,7 @@ class MaintenanceRequestController extends Controller
      */
     public function updateStatus(UpdateMaintenanceStatusRequest $request, MaintenanceRequest $ticket): RedirectResponse
     {
-        $this->authorizeAccess($request, $ticket);
+        $this->authorize('updateStatus', $ticket);
 
         $data = $request->validated();
         $fromStatus = $ticket->status;
@@ -177,33 +177,5 @@ class MaintenanceRequestController extends Controller
         ]);
 
         return redirect()->route('maintenance.show', $ticket)->with('status', 'Status updated.');
-    }
-
-    /**
-     * A student may only see their own tickets; staff may see all.
-     */
-    private function authorizeAccess(Request $request, MaintenanceRequest $ticket): void
-    {
-        $user = $request->user();
-
-        abort_if(
-            $user->hasRole(Role::Student) && $ticket->studentProfile->user_id !== $user->id,
-            403
-        );
-    }
-
-    /**
-     * A student may only edit their own ticket while it's still pending;
-     * staff may edit at any stage.
-     */
-    private function authorizeEdit(Request $request, MaintenanceRequest $ticket): void
-    {
-        $user = $request->user();
-
-        abort_if(
-            $user->hasRole(Role::Student) && $ticket->status !== MaintenanceStatus::Pending,
-            403,
-            'This request can no longer be edited.'
-        );
     }
 }

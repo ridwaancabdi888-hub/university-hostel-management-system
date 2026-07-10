@@ -36,9 +36,17 @@ class InvoiceRequest extends FormRequest
             ],
             'billing_month' => [
                 $invoice ? 'prohibited' : 'required', 'date',
+                // whereYear/whereMonth (rather than a DATE_FORMAT(...) raw
+                // query) so this works identically on MySQL and SQLite (the
+                // test suite's driver).
                 Rule::unique('invoices')
-                    ->where(fn ($query) => $query->where('student_profile_id', $this->input('student_profile_id'))
-                        ->whereRaw('DATE_FORMAT(billing_month, "%Y-%m") = ?', [$this->date('billing_month')?->format('Y-m')]))
+                    ->where(function ($query) {
+                        $billingMonth = $this->date('billing_month');
+
+                        return $query->where('student_profile_id', $this->input('student_profile_id'))
+                            ->whereYear('billing_month', $billingMonth?->year)
+                            ->whereMonth('billing_month', $billingMonth?->month);
+                    })
                     ->ignore($invoice),
             ],
             'rent_amount' => ['required', 'numeric', 'min:0', 'max:99999.99'],

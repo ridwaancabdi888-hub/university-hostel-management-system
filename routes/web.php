@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\AllocationController;
 use App\Http\Controllers\BlockController;
 use App\Http\Controllers\DashboardController;
@@ -76,20 +77,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // invoice ID.
     Route::middleware('role:admin,accountant')->group(function () {
         Route::get('/invoices/create', [InvoiceController::class, 'create'])->name('invoices.create');
-        Route::post('/invoices', [InvoiceController::class, 'store'])->name('invoices.store');
+        Route::post('/invoices', [InvoiceController::class, 'store'])->name('invoices.store')->middleware('throttle:sensitive-writes');
         Route::get('/invoices/generate', [InvoiceController::class, 'generateForm'])->name('invoices.generate.form');
-        Route::post('/invoices/generate', [InvoiceController::class, 'generate'])->name('invoices.generate');
+        Route::post('/invoices/generate', [InvoiceController::class, 'generate'])->name('invoices.generate')->middleware('throttle:sensitive-writes');
 
         Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
         Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
         Route::get('/invoices/{invoice}/edit', [InvoiceController::class, 'edit'])->name('invoices.edit');
-        Route::put('/invoices/{invoice}', [InvoiceController::class, 'update'])->name('invoices.update');
-        Route::delete('/invoices/{invoice}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
-        Route::post('/invoices/{invoice}/apply-late-fee', [InvoiceController::class, 'applyLateFee'])->name('invoices.apply-late-fee');
+        Route::put('/invoices/{invoice}', [InvoiceController::class, 'update'])->name('invoices.update')->middleware('throttle:sensitive-writes');
+        Route::delete('/invoices/{invoice}', [InvoiceController::class, 'destroy'])->name('invoices.destroy')->middleware('throttle:sensitive-writes');
+        Route::post('/invoices/{invoice}/apply-late-fee', [InvoiceController::class, 'applyLateFee'])->name('invoices.apply-late-fee')->middleware('throttle:sensitive-writes');
         Route::get('/invoices/{invoice}/pdf', [InvoiceController::class, 'pdf'])->name('invoices.pdf');
 
-        Route::post('/invoices/{invoice}/payments', [PaymentController::class, 'store'])->name('payments.store');
-        Route::delete('/payments/{payment}', [PaymentController::class, 'destroy'])->name('payments.destroy');
+        Route::post('/invoices/{invoice}/payments', [PaymentController::class, 'store'])->name('payments.store')->middleware('throttle:sensitive-writes');
+        Route::delete('/payments/{payment}', [PaymentController::class, 'destroy'])->name('payments.destroy')->middleware('throttle:sensitive-writes');
         Route::get('/payments/{payment}/receipt', [PaymentController::class, 'receipt'])->name('payments.receipt');
     });
 
@@ -124,8 +125,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     Route::middleware('role:admin,warden')->group(function () {
-        Route::post('/visitors/{visitor}/approve', [VisitorController::class, 'approve'])->name('visitors.approve');
-        Route::post('/visitors/{visitor}/reject', [VisitorController::class, 'reject'])->name('visitors.reject');
+        Route::post('/visitors/{visitor}/approve', [VisitorController::class, 'approve'])->name('visitors.approve')->middleware('throttle:sensitive-writes');
+        Route::post('/visitors/{visitor}/reject', [VisitorController::class, 'reject'])->name('visitors.reject')->middleware('throttle:sensitive-writes');
+    });
+
+    Route::middleware('role:admin')->group(function () {
+        Route::get('/activity-log', [ActivityLogController::class, 'index'])->name('activity-log.index');
     });
 
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');

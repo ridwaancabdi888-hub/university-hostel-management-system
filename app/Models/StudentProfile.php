@@ -13,11 +13,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class StudentProfile extends Model
 {
     /** @use HasFactory<StudentProfileFactory> */
     use HasFactory;
+
+    use LogsActivity;
 
     protected $fillable = [
         'user_id',
@@ -68,5 +72,13 @@ class StudentProfile extends Model
     public function activeAllocation(): HasOne
     {
         return $this->hasOne(RoomAllocation::class)->where('status', AllocationStatus::Active);
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['status', 'course', 'year_level'])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
     }
 }

@@ -4,15 +4,24 @@ namespace App\Models;
 
 use App\Enums\InvoiceStatus;
 use App\Observers\InvoiceObserver;
+use Database\Factories\InvoiceFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 #[ObservedBy(InvoiceObserver::class)]
 class Invoice extends Model
 {
+    /** @use HasFactory<InvoiceFactory> */
+    use HasFactory;
+
+    use LogsActivity;
+
     protected $fillable = [
         'invoice_number',
         'student_profile_id',
@@ -99,5 +108,13 @@ class Invoice extends Model
     public function scopeOverdue(Builder $query): Builder
     {
         return $query->where('status', InvoiceStatus::Unpaid)->where('due_date', '<', now()->startOfDay());
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['status', 'total_amount', 'late_fee_amount', 'discount_amount', 'due_date', 'paid_at'])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
     }
 }

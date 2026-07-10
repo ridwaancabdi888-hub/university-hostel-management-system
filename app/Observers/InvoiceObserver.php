@@ -32,15 +32,24 @@ class InvoiceObserver
     /**
      * Generate the next sequential invoice number for the current year,
      * e.g. INV-2026-00001.
+     *
+     * Uses plain Eloquent (no raw SQL) so it works identically on MySQL and
+     * SQLite (the test suite's driver), and locks the matching row so two
+     * concurrent creations inside a transaction can't compute the same
+     * sequence (see callers in InvoiceController, which wrap creation in
+     * DB::transaction()).
      */
     private function nextInvoiceNumber(): string
     {
         $prefix = 'INV-'.now()->year.'-';
 
-        $lastSequence = Invoice::where('invoice_number', 'like', "{$prefix}%")
-            ->selectRaw('MAX(CAST(SUBSTRING(invoice_number, ?) AS UNSIGNED)) as max_seq', [strlen($prefix) + 1])
-            ->value('max_seq');
+        $lastNumber = Invoice::where('invoice_number', 'like', "{$prefix}%")
+            ->orderByDesc('invoice_number')
+            ->lockForUpdate()
+            ->value('invoice_number');
 
-        return $prefix.str_pad(((int) $lastSequence) + 1, 5, '0', STR_PAD_LEFT);
+        $lastSequence = $lastNumber ? (int) substr($lastNumber, strlen($prefix)) : 0;
+
+        return $prefix.str_pad($lastSequence + 1, 5, '0', STR_PAD_LEFT);
     }
 }

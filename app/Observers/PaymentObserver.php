@@ -70,15 +70,24 @@ class PaymentObserver
     /**
      * Generate the next sequential receipt number for the current year,
      * e.g. RCT-2026-00001.
+     *
+     * Uses plain Eloquent (no raw SQL) so it works identically on MySQL and
+     * SQLite (the test suite's driver), and locks the matching row so two
+     * concurrent creations inside a transaction can't compute the same
+     * sequence (see the caller in PaymentController, which wraps creation
+     * in DB::transaction()).
      */
     private function nextReceiptNumber(): string
     {
         $prefix = 'RCT-'.now()->year.'-';
 
-        $lastSequence = Payment::where('receipt_number', 'like', "{$prefix}%")
-            ->selectRaw('MAX(CAST(SUBSTRING(receipt_number, ?) AS UNSIGNED)) as max_seq', [strlen($prefix) + 1])
-            ->value('max_seq');
+        $lastNumber = Payment::where('receipt_number', 'like', "{$prefix}%")
+            ->orderByDesc('receipt_number')
+            ->lockForUpdate()
+            ->value('receipt_number');
 
-        return $prefix.str_pad(((int) $lastSequence) + 1, 5, '0', STR_PAD_LEFT);
+        $lastSequence = $lastNumber ? (int) substr($lastNumber, strlen($prefix)) : 0;
+
+        return $prefix.str_pad($lastSequence + 1, 5, '0', STR_PAD_LEFT);
     }
 }
