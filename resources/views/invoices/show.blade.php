@@ -1,13 +1,17 @@
 <x-dashboard-layout :title="$invoice->invoice_number">
+    @php $isStudent = auth()->user()->role === \App\Enums\Role::Student; @endphp
+
     <div class="mb-4 flex items-center justify-between">
         <a href="{{ route('invoices.index') }}" class="text-sm font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">&larr; Back to Billing History</a>
         <div class="flex items-center gap-3">
             <a href="{{ route('invoices.pdf', $invoice) }}" class="inline-flex items-center rounded-md bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 shadow-sm ring-1 ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-600 dark:hover:bg-gray-700">
                 Download PDF
             </a>
-            <a href="{{ route('invoices.edit', $invoice) }}" class="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white hover:bg-indigo-500">
-                Edit
-            </a>
+            @unless ($isStudent)
+                <a href="{{ route('invoices.edit', $invoice) }}" class="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white hover:bg-indigo-500">
+                    Edit
+                </a>
+            @endunless
         </div>
     </div>
 
@@ -74,7 +78,7 @@
             @endif
         </div>
 
-        @if ($invoice->status !== \App\Enums\InvoiceStatus::Cancelled)
+        @if (! $isStudent && $invoice->status !== \App\Enums\InvoiceStatus::Cancelled)
             <div class="mt-6 flex items-center gap-3 border-t border-gray-200 pt-6 dark:border-gray-700">
                 @if ($invoice->isOverdue())
                     <form method="POST" action="{{ route('invoices.apply-late-fee', $invoice) }}">
@@ -92,7 +96,7 @@
         @endif
     </div>
 
-    @if ($invoice->balance() > 0 && $invoice->status !== \App\Enums\InvoiceStatus::Cancelled)
+    @if (! $isStudent && $invoice->balance() > 0 && $invoice->status !== \App\Enums\InvoiceStatus::Cancelled)
         <div class="mt-6 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
             <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Record Payment</h3>
 
@@ -159,7 +163,9 @@
                         <th class="px-2 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Method</th>
                         <th class="px-2 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Date</th>
                         <th class="px-2 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Recorded By</th>
-                        <th class="px-2 py-2 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Actions</th>
+                        @unless ($isStudent)
+                            <th class="px-2 py-2 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Actions</th>
+                        @endunless
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -170,11 +176,13 @@
                             <td class="px-2 py-2 text-sm text-gray-500 dark:text-gray-400">{{ $payment->payment_method->label() }}</td>
                             <td class="px-2 py-2 text-sm text-gray-500 dark:text-gray-400">{{ $payment->paid_at->format('M j, Y') }}</td>
                             <td class="px-2 py-2 text-sm text-gray-500 dark:text-gray-400">{{ $payment->recordedBy?->name ?? '—' }}</td>
-                            <td class="px-2 py-2 text-right text-sm">
-                                <a href="{{ route('payments.receipt', $payment) }}" class="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">Receipt</a>
-                                <span class="mx-2 text-gray-300 dark:text-gray-600">|</span>
-                                <x-delete-button :action="route('payments.destroy', $payment)" confirm="Remove this payment? This will reduce the amount paid on the invoice." class="inline">Remove</x-delete-button>
-                            </td>
+                            @unless ($isStudent)
+                                <td class="px-2 py-2 text-right text-sm">
+                                    <a href="{{ route('payments.receipt', $payment) }}" class="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">Receipt</a>
+                                    <span class="mx-2 text-gray-300 dark:text-gray-600">|</span>
+                                    <x-delete-button :action="route('payments.destroy', $payment)" confirm="Remove this payment? This will reduce the amount paid on the invoice." class="inline">Remove</x-delete-button>
+                                </td>
+                            @endunless
                         </tr>
                     @empty
                         <tr>

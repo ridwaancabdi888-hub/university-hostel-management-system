@@ -49,11 +49,25 @@ class Navigation
                 'roles' => [Role::Admin, Role::Warden, Role::Student],
             ],
             [
+                'label' => 'Room Requests',
+                'route' => 'room-requests.index',
+                'active' => ['room-requests.*'],
+                'icon' => 'door',
+                'roles' => [Role::Admin, Role::Warden, Role::Student],
+            ],
+            [
                 'label' => 'Financials',
                 'route' => 'invoices.index',
                 'active' => ['invoices.*', 'payments.*'],
                 'icon' => 'banknotes',
                 'roles' => [Role::Admin, Role::Accountant],
+            ],
+            [
+                'label' => 'My Bills',
+                'route' => 'invoices.index',
+                'active' => ['invoices.*'],
+                'icon' => 'banknotes',
+                'roles' => [Role::Student],
             ],
             [
                 'label' => 'Reports',

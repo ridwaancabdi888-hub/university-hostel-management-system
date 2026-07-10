@@ -28,6 +28,7 @@ class RoomTypeRequest extends FormRequest
             'default_capacity' => ['required', 'integer', 'min:1', 'max:20'],
             'monthly_rate' => ['required', 'numeric', 'min:0', 'max:99999.99'],
             'description' => ['nullable', 'string', 'max:1000'],
+            'amenities' => ['nullable', 'string', 'max:1000'],
         ];
     }
 }

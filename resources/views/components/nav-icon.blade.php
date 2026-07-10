@@ -13,6 +13,7 @@
         'user-plus' => 'person_add',
         'support' => 'help',
         'chart-bar' => 'analytics',
+        'door' => 'meeting_room',
     ];
 @endphp
 

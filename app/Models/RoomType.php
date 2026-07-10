@@ -17,6 +17,7 @@ class RoomType extends Model
         'default_capacity',
         'monthly_rate',
         'description',
+        'amenities',
     ];
 
     protected function casts(): array
@@ -24,6 +25,7 @@ class RoomType extends Model
         return [
             'default_capacity' => 'integer',
             'monthly_rate' => 'decimal:2',
+            'amenities' => 'array',
         ];
     }
 

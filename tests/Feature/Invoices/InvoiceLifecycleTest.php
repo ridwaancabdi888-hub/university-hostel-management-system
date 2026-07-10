@@ -104,4 +104,42 @@ class InvoiceLifecycleTest extends TestCase
         $response->assertSessionHas('error');
         $this->assertNotNull($invoice->fresh());
     }
+
+    public function test_a_student_can_view_their_own_invoice_but_not_another_students(): void
+    {
+        $studentUser = User::factory()->create(['role' => Role::Student]);
+        $profile = StudentProfile::factory()->create(['user_id' => $studentUser->id]);
+
+        $own = Invoice::factory()->create(['student_profile_id' => $profile->id]);
+        $other = Invoice::factory()->create();
+
+        $this->actingAs($studentUser)->get("/invoices/{$own->id}")->assertOk();
+        $this->actingAs($studentUser)->get("/invoices/{$other->id}")->assertForbidden();
+    }
+
+    public function test_a_student_only_sees_their_own_invoices_in_the_billing_list(): void
+    {
+        $studentUser = User::factory()->create(['role' => Role::Student]);
+        $profile = StudentProfile::factory()->create(['user_id' => $studentUser->id]);
+
+        $own = Invoice::factory()->create(['student_profile_id' => $profile->id]);
+        $other = Invoice::factory()->create();
+
+        $response = $this->actingAs($studentUser)->get('/invoices');
+
+        $response->assertOk();
+        $response->assertSee($own->invoice_number);
+        $response->assertDontSee($other->invoice_number);
+    }
+
+    public function test_a_student_cannot_create_edit_or_delete_invoices(): void
+    {
+        $studentUser = User::factory()->create(['role' => Role::Student]);
+        $profile = StudentProfile::factory()->create(['user_id' => $studentUser->id]);
+        $invoice = Invoice::factory()->create(['student_profile_id' => $profile->id]);
+
+        $this->actingAs($studentUser)->get('/invoices/create')->assertForbidden();
+        $this->actingAs($studentUser)->get("/invoices/{$invoice->id}/edit")->assertForbidden();
+        $this->actingAs($studentUser)->delete("/invoices/{$invoice->id}")->assertForbidden();
+    }
 }

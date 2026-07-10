@@ -10,6 +10,7 @@ use App\Models\Block;
 use App\Models\Invoice;
 use App\Models\MaintenanceRequest;
 use App\Models\Payment;
+use App\Models\StudentProfile;
 use App\Models\Visitor;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -27,6 +28,14 @@ class DashboardController extends Controller
 
         if (in_array($role, [Role::Admin, Role::Accountant], true)) {
             $data += $this->financeOverview();
+        }
+
+        if ($role === Role::Student) {
+            $profile = $request->user()->studentProfile;
+
+            $data += $profile
+                ? $this->studentRoomOverview($profile)
+                : ['myRoom' => null, 'pendingRoomRequest' => null, 'profilePending' => true];
         }
 
         return view('dashboard', $data);
@@ -100,6 +109,41 @@ class DashboardController extends Controller
                 ->withSum('payments', 'amount')
                 ->get()
                 ->sum(fn (Invoice $invoice) => $invoice->balance()),
+        ];
+    }
+
+    /**
+     * The student's own room details (if allocated) or their pending
+     * request status (if not) — the only "housing" view a Student gets.
+     *
+     * @return array<string, mixed>
+     */
+    private function studentRoomOverview(StudentProfile $profile): array
+    {
+        $allocation = $profile->activeAllocation()->with(['room.roomType', 'room.floor.block.hostel'])->first();
+
+        if (! $allocation) {
+            return [
+                'myRoom' => null,
+                'pendingRoomRequest' => $profile->pendingRoomRequest()->with('room')->first(),
+                'profilePending' => false,
+            ];
+        }
+
+        $room = $allocation->room;
+
+        return [
+            'myRoom' => [
+                'roomNumber' => $room->room_number,
+                'bedNumber' => $allocation->bed_number,
+                'monthlyRate' => (float) $room->roomType->monthly_rate,
+                'amenities' => $room->roomType->amenities ?? [],
+                'block' => $room->floor->block->name,
+                'hostel' => $room->floor->block->hostel->name,
+                'floor' => $room->floor->name,
+                'photoUrl' => $room->photoUrl(),
+            ],
+            'profilePending' => false,
         ];
     }
 }

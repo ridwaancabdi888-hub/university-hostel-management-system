@@ -1,16 +1,26 @@
 <x-dashboard-layout title="Billing History">
     <x-financial-tabs active="invoices" />
 
+    @php $isStudent = auth()->user()->role === \App\Enums\Role::Student; @endphp
+
     <div class="mb-4 flex items-center justify-between">
-        <p class="text-sm text-gray-500 dark:text-gray-400">Monthly rent, utility charges, late fees, and discounts for every student.</p>
-        <div class="flex items-center gap-3">
-            <a href="{{ route('invoices.generate.form') }}" class="inline-flex items-center rounded-md bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 shadow-sm ring-1 ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-600 dark:hover:bg-gray-700">
-                Generate Monthly Bills
-            </a>
-            <a href="{{ route('invoices.create') }}" class="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white hover:bg-indigo-500">
-                New Invoice
-            </a>
-        </div>
+        <p class="text-sm text-gray-500 dark:text-gray-400">
+            @if ($isStudent)
+                Your monthly rent, utility charges, late fees, and discounts.
+            @else
+                Monthly rent, utility charges, late fees, and discounts for every student.
+            @endif
+        </p>
+        @unless ($isStudent)
+            <div class="flex items-center gap-3">
+                <a href="{{ route('invoices.generate.form') }}" class="inline-flex items-center rounded-md bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 shadow-sm ring-1 ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-600 dark:hover:bg-gray-700">
+                    Generate Monthly Bills
+                </a>
+                <a href="{{ route('invoices.create') }}" class="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white hover:bg-indigo-500">
+                    New Invoice
+                </a>
+            </div>
+        @endunless
     </div>
 
     <form method="GET" action="{{ route('invoices.index') }}" class="mb-6 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">

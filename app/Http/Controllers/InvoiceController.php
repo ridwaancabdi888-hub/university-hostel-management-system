@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\InvoiceStatus;
+use App\Enums\Role;
 use App\Http\Requests\GenerateBillsRequest;
 use App\Http\Requests\InvoiceRequest;
 use App\Models\Invoice;
@@ -27,6 +28,10 @@ class InvoiceController extends Controller
     public function index(Request $request): View
     {
         $query = Invoice::with(['studentProfile.user'])->withSum('payments', 'amount');
+
+        if ($request->user()->hasRole(Role::Student)) {
+            $query->whereHas('studentProfile', fn ($q) => $q->where('user_id', $request->user()->id));
+        }
 
         if ($search = $request->string('search')->trim()->toString()) {
             $query->where(function ($query) use ($search) {
@@ -95,6 +100,8 @@ class InvoiceController extends Controller
      */
     public function show(Invoice $invoice): View
     {
+        $this->authorize('view', $invoice);
+
         $invoice->load([
             'studentProfile.user',
             'roomAllocation.room.floor.block.hostel',
@@ -225,6 +232,8 @@ class InvoiceController extends Controller
      */
     public function pdf(Invoice $invoice)
     {
+        $this->authorize('view', $invoice);
+
         $invoice->load(['studentProfile.user', 'roomAllocation.room.floor.block.hostel']);
 
         return Pdf::loadView('invoices.pdf', ['invoice' => $invoice])

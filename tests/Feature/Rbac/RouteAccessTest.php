@@ -70,12 +70,19 @@ class RouteAccessTest extends TestCase
         $this->actingAs($this->accountant)->get('/visitors')->assertForbidden();
     }
 
-    public function test_billing_is_restricted_to_admin_and_accountant(): void
+    public function test_billing_is_open_to_admin_accountant_and_student_but_not_warden(): void
     {
         $this->actingAs($this->admin)->get('/invoices')->assertOk();
         $this->actingAs($this->accountant)->get('/invoices')->assertOk();
+        $this->actingAs($this->student)->get('/invoices')->assertOk();
         $this->actingAs($this->warden)->get('/invoices')->assertForbidden();
-        $this->actingAs($this->student)->get('/invoices')->assertForbidden();
+    }
+
+    public function test_invoice_management_actions_remain_restricted_to_admin_and_accountant(): void
+    {
+        $this->actingAs($this->student)->get('/invoices/create')->assertForbidden();
+        $this->actingAs($this->student)->get('/invoices/generate')->assertForbidden();
+        $this->actingAs($this->warden)->get('/invoices/create')->assertForbidden();
     }
 
     public function test_reports_center_is_open_to_admin_warden_and_accountant_but_not_student(): void

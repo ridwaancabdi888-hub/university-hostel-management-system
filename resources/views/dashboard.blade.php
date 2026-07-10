@@ -120,6 +120,63 @@
                 <p class="mt-1 font-label-sm text-on-surface-variant dark:text-night-on-surface-variant">Across all unpaid invoices</p>
             </div>
         </div>
+    @elseif ($role === \App\Enums\Role::Student)
+        <h3 class="mb-md mt-xl font-headline-sm text-on-surface dark:text-night-on-surface">My Room</h3>
+
+        @if ($profilePending)
+            <div class="glass-card rounded-lg p-lg">
+                <p class="font-body-md text-on-surface-variant dark:text-night-on-surface-variant">Your student profile hasn't been set up yet. Contact the hostel administration to complete your registration before requesting a room.</p>
+            </div>
+        @elseif ($myRoom)
+            <div class="glass-card overflow-hidden rounded-lg">
+                <div class="flex flex-col sm:flex-row">
+                    <div class="relative h-40 w-full sm:h-auto sm:w-64 sm:shrink-0">
+                        @if ($myRoom['photoUrl'])
+                            <img src="{{ $myRoom['photoUrl'] }}" alt="Room {{ $myRoom['roomNumber'] }}" class="h-full w-full object-cover">
+                        @else
+                            <div class="flex h-full w-full items-center justify-center bg-gradient-to-br from-secondary-container/60 to-secondary-container/20 dark:from-night-surface-high dark:to-night-surface">
+                                <span class="material-symbols-outlined text-[36px] text-primary/40 dark:text-night-primary/40">bed</span>
+                            </div>
+                        @endif
+                    </div>
+                    <div class="flex-1 p-lg">
+                        <div class="flex flex-wrap items-start justify-between gap-2">
+                            <div>
+                                <h4 class="font-headline-sm text-on-surface dark:text-night-on-surface">Room {{ $myRoom['roomNumber'] }} &middot; Bed {{ $myRoom['bedNumber'] }}</h4>
+                                <p class="mt-1 font-body-md text-on-surface-variant dark:text-night-on-surface-variant">
+                                    <span class="material-symbols-outlined align-middle text-[16px]">location_on</span>
+                                    {{ $myRoom['floor'] }}, {{ $myRoom['block'] }} &middot; {{ $myRoom['hostel'] }}
+                                </p>
+                            </div>
+                            <p class="font-headline-sm text-primary dark:text-night-primary">${{ number_format($myRoom['monthlyRate'], 2) }}<span class="font-label-sm font-normal text-on-surface-variant dark:text-night-on-surface-variant">/mo</span></p>
+                        </div>
+
+                        @if (count($myRoom['amenities']))
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                @foreach ($myRoom['amenities'] as $amenity)
+                                    <span class="rounded-full bg-secondary-container/50 px-3 py-1 font-label-sm text-on-surface dark:bg-night-secondary-container dark:text-night-on-surface">{{ $amenity }}</span>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        @elseif ($pendingRoomRequest)
+            <div class="glass-card rounded-lg p-lg">
+                <p class="font-body-md text-on-surface dark:text-night-on-surface">
+                    Your request for Room {{ $pendingRoomRequest->room->room_number }} is <span class="font-medium text-tertiary dark:text-orange-400">pending review</span>.
+                </p>
+                <a href="{{ route('room-requests.index') }}" class="mt-3 inline-block font-label-md font-medium text-primary hover:underline dark:text-night-primary">View Request Status &rarr;</a>
+            </div>
+        @else
+            <div class="glass-card rounded-lg p-lg">
+                <p class="font-body-md text-on-surface-variant dark:text-night-on-surface-variant">You don't have a room yet.</p>
+                <a href="{{ route('room-requests.index') }}" class="mt-3 inline-flex items-center gap-2 rounded-DEFAULT bg-primary px-md py-sm font-label-md text-on-primary hover:shadow-lg hover:shadow-primary/25 dark:bg-night-primary dark:text-night-on-primary transition-all">
+                    <span class="material-symbols-outlined text-[18px]">meeting_room</span>
+                    Browse Available Rooms
+                </a>
+            </div>
+        @endif
     @endif
 
     @if (count($quickLinks))

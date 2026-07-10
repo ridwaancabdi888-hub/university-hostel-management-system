@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\AllocationStatus;
 use App\Enums\Gender;
+use App\Enums\RoomRequestStatus;
 use App\Enums\StudentStatus;
 use App\Enums\YearLevel;
 use Database\Factories\StudentProfileFactory;
@@ -72,6 +73,16 @@ class StudentProfile extends Model
     public function activeAllocation(): HasOne
     {
         return $this->hasOne(RoomAllocation::class)->where('status', AllocationStatus::Active);
+    }
+
+    public function roomRequests(): HasMany
+    {
+        return $this->hasMany(RoomRequest::class);
+    }
+
+    public function pendingRoomRequest(): HasOne
+    {
+        return $this->hasOne(RoomRequest::class)->where('status', RoomRequestStatus::Pending);
     }
 
     public function getActivitylogOptions(): LogOptions

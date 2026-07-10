@@ -28,3 +28,11 @@
         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600">{{ old('description', $roomType->description ?? '') }}</textarea>
     <x-input-error :messages="$errors->get('description')" class="mt-2" />
 </div>
+
+<div class="mt-4">
+    <x-input-label for="amenities" value="Amenities (comma-separated)" />
+    <x-text-input id="amenities" name="amenities" type="text" class="mt-1 block w-full"
+        placeholder="e.g. Private Bathroom, Air Conditioning, Study Desk"
+        :value="old('amenities', implode(', ', $roomType->amenities ?? []))" />
+    <x-input-error :messages="$errors->get('amenities')" class="mt-2" />
+</div>

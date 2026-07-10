@@ -7,14 +7,44 @@
         </a>
     </div>
 
-    <div class="glass-card rounded-lg p-lg">
-        <div class="flex flex-wrap items-center gap-3">
-            <h2 class="font-headline-sm text-on-surface dark:text-night-on-surface">{{ $room->room_number }}</h2>
-            <x-rooms.occupancy-badge :room="$room" />
+    <div class="glass-card overflow-hidden rounded-lg">
+        <div class="flex flex-col sm:flex-row">
+            <div class="relative h-48 w-full sm:h-auto sm:w-72 sm:shrink-0">
+                @if ($room->photoUrl())
+                    <img src="{{ $room->photoUrl() }}" alt="{{ $room->room_number }}" class="h-full w-full object-cover">
+                @else
+                    <div class="flex h-full w-full items-center justify-center bg-gradient-to-br from-secondary-container/60 to-secondary-container/20 dark:from-night-surface-high dark:to-night-surface">
+                        <span class="material-symbols-outlined text-[36px] text-primary/40 dark:text-night-primary/40">bed</span>
+                    </div>
+                @endif
+            </div>
+            <div class="flex-1 p-lg">
+                <div class="flex flex-wrap items-start justify-between gap-2">
+                    <div>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <h2 class="font-headline-sm text-on-surface dark:text-night-on-surface">{{ $room->room_number }}</h2>
+                            <x-rooms.occupancy-badge :room="$room" />
+                        </div>
+                        <p class="mt-1 font-body-md text-on-surface-variant dark:text-night-on-surface-variant">
+                            {{ $room->floor->block->name }} — {{ $room->floor->name }} ({{ $room->floor->block->hostel->name }}) &middot; {{ $room->roomType->name }}
+                        </p>
+                    </div>
+                    <p class="font-headline-sm text-primary dark:text-night-primary">${{ number_format($room->roomType->monthly_rate, 2) }}<span class="font-label-sm font-normal text-on-surface-variant dark:text-night-on-surface-variant">/mo</span></p>
+                </div>
+
+                @if (! empty($room->roomType->amenities))
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        @foreach ($room->roomType->amenities as $amenity)
+                            <span class="rounded-full bg-secondary-container/50 px-3 py-1 font-label-sm text-on-surface dark:bg-night-secondary-container dark:text-night-on-surface">{{ $amenity }}</span>
+                        @endforeach
+                    </div>
+                @endif
+
+                @if ($room->notes)
+                    <p class="mt-4 font-body-md text-on-surface-variant dark:text-night-on-surface-variant">{{ $room->notes }}</p>
+                @endif
+            </div>
         </div>
-        <p class="mt-1 font-body-md text-on-surface-variant dark:text-night-on-surface-variant">
-            {{ $room->floor->block->name }} — {{ $room->floor->name }} ({{ $room->floor->block->hostel->name }}) &middot; {{ $room->roomType->name }}
-        </p>
     </div>
 
     <div class="glass-card mt-6 rounded-lg p-lg">

@@ -36,7 +36,7 @@ class RoomTypeController extends Controller
      */
     public function store(RoomTypeRequest $request): RedirectResponse
     {
-        RoomType::create($request->validated());
+        RoomType::create($this->withAmenities($request->validated()));
 
         return redirect()->route('room-types.index')->with('status', 'Room type created.');
     }
@@ -56,9 +56,23 @@ class RoomTypeController extends Controller
      */
     public function update(RoomTypeRequest $request, RoomType $roomType): RedirectResponse
     {
-        $roomType->update($request->validated());
+        $roomType->update($this->withAmenities($request->validated()));
 
         return redirect()->route('room-types.index')->with('status', 'Room type updated.');
+    }
+
+    /**
+     * Explode the comma-separated amenities input into a clean array
+     * before it's persisted to the JSON column.
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    private function withAmenities(array $data): array
+    {
+        $data['amenities'] = array_values(array_filter(array_map('trim', explode(',', $data['amenities'] ?? ''))));
+
+        return $data;
     }
 
     /**

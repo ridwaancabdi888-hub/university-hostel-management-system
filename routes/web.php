@@ -14,6 +14,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RoomController;
+use App\Http\Controllers\RoomRequestController;
 use App\Http\Controllers\RoomTypeController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\VisitorController;
@@ -80,14 +81,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/invoices', [InvoiceController::class, 'store'])->name('invoices.store')->middleware('throttle:sensitive-writes');
         Route::get('/invoices/generate', [InvoiceController::class, 'generateForm'])->name('invoices.generate.form');
         Route::post('/invoices/generate', [InvoiceController::class, 'generate'])->name('invoices.generate')->middleware('throttle:sensitive-writes');
+    });
 
+    // Students may view (but not create, edit, or delete) their own
+    // invoices — InvoiceController scopes the index query and Invoice
+    // show()/pdf() call InvoicePolicy::view() to enforce ownership.
+    Route::middleware('role:admin,accountant,student')->group(function () {
         Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
         Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
+        Route::get('/invoices/{invoice}/pdf', [InvoiceController::class, 'pdf'])->name('invoices.pdf');
+    });
+
+    Route::middleware('role:admin,accountant')->group(function () {
         Route::get('/invoices/{invoice}/edit', [InvoiceController::class, 'edit'])->name('invoices.edit');
         Route::put('/invoices/{invoice}', [InvoiceController::class, 'update'])->name('invoices.update')->middleware('throttle:sensitive-writes');
         Route::delete('/invoices/{invoice}', [InvoiceController::class, 'destroy'])->name('invoices.destroy')->middleware('throttle:sensitive-writes');
         Route::post('/invoices/{invoice}/apply-late-fee', [InvoiceController::class, 'applyLateFee'])->name('invoices.apply-late-fee')->middleware('throttle:sensitive-writes');
-        Route::get('/invoices/{invoice}/pdf', [InvoiceController::class, 'pdf'])->name('invoices.pdf');
 
         Route::post('/invoices/{invoice}/payments', [PaymentController::class, 'store'])->name('payments.store')->middleware('throttle:sensitive-writes');
         Route::delete('/payments/{payment}', [PaymentController::class, 'destroy'])->name('payments.destroy')->middleware('throttle:sensitive-writes');
@@ -127,6 +136,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('role:admin,warden')->group(function () {
         Route::post('/visitors/{visitor}/approve', [VisitorController::class, 'approve'])->name('visitors.approve')->middleware('throttle:sensitive-writes');
         Route::post('/visitors/{visitor}/reject', [VisitorController::class, 'reject'])->name('visitors.reject')->middleware('throttle:sensitive-writes');
+    });
+
+    Route::middleware('role:admin,warden,student')->group(function () {
+        Route::get('/room-requests', [RoomRequestController::class, 'index'])->name('room-requests.index');
+        Route::post('/room-requests', [RoomRequestController::class, 'store'])->name('room-requests.store');
+    });
+
+    Route::middleware('role:admin,warden')->group(function () {
+        Route::post('/room-requests/{roomRequest}/approve', [RoomRequestController::class, 'approve'])->name('room-requests.approve')->middleware('throttle:sensitive-writes');
+        Route::post('/room-requests/{roomRequest}/reject', [RoomRequestController::class, 'reject'])->name('room-requests.reject')->middleware('throttle:sensitive-writes');
     });
 
     Route::middleware('role:admin')->group(function () {
