@@ -33,6 +33,7 @@ class BlockRequest extends FormRequest
             ],
             'code' => ['nullable', 'string', 'max:20'],
             'description' => ['nullable', 'string', 'max:1000'],
+            'photo' => ['nullable', 'image', 'max:2048'],
         ];
     }
 }

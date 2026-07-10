@@ -6,6 +6,7 @@ use App\Http\Requests\BlockRequest;
 use App\Models\Block;
 use App\Models\Hostel;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class BlockController extends Controller
@@ -40,7 +41,12 @@ class BlockController extends Controller
      */
     public function store(BlockRequest $request): RedirectResponse
     {
-        Block::create($request->validated());
+        $data = $request->validated();
+
+        Block::create([
+            ...collect($data)->except('photo')->toArray(),
+            'photo_path' => $request->hasFile('photo') ? $request->file('photo')->store('block-photos', 'public') : null,
+        ]);
 
         return redirect()->route('blocks.index')->with('status', 'Block created.');
     }
@@ -61,7 +67,21 @@ class BlockController extends Controller
      */
     public function update(BlockRequest $request, Block $block): RedirectResponse
     {
-        $block->update($request->validated());
+        $data = $request->validated();
+        $photoPath = $block->photo_path;
+
+        if ($request->hasFile('photo')) {
+            if ($photoPath) {
+                Storage::disk('public')->delete($photoPath);
+            }
+
+            $photoPath = $request->file('photo')->store('block-photos', 'public');
+        }
+
+        $block->update([
+            ...collect($data)->except('photo')->toArray(),
+            'photo_path' => $photoPath,
+        ]);
 
         return redirect()->route('blocks.index')->with('status', 'Block updated.');
     }
@@ -74,6 +94,10 @@ class BlockController extends Controller
         if ($block->floors()->exists()) {
             return redirect()->route('blocks.index')
                 ->with('error', "Cannot delete \"{$block->name}\" while it still has floors assigned to it.");
+        }
+
+        if ($block->photo_path) {
+            Storage::disk('public')->delete($block->photo_path);
         }
 
         $block->delete();

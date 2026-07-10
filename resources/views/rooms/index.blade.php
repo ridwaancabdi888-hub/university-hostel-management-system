@@ -9,8 +9,14 @@
     </div>
 
     <form method="GET" action="{{ route('rooms.index') }}" class="mb-6 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
-        <x-input-label for="search" value="Search" />
-        <x-text-input id="search" name="search" type="text" class="mt-1 block w-full" value="{{ $filters['search'] ?? '' }}" placeholder="Search by room number, block, or hostel..." />
+        <div class="relative">
+            <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 dark:text-gray-500">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                </svg>
+            </span>
+            <x-text-input id="search" name="search" type="text" class="block w-full !rounded-full !pl-10" value="{{ $filters['search'] ?? '' }}" placeholder="Search by room number, block, or hostel..." />
+        </div>
 
         <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-4">
             <div>
@@ -64,10 +70,9 @@
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead class="bg-gray-50 dark:bg-gray-900/50">
                 <tr>
-                    <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Room No</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Room</th>
                     <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Block</th>
                     <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Floor</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Room Type</th>
                     <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Occupancy</th>
                     <th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Actions</th>
                 </tr>
@@ -75,12 +80,17 @@
             <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                 @forelse ($rooms as $room)
                     <tr>
-                        <td class="px-4 py-3 text-sm font-semibold">
-                            <a href="{{ route('rooms.show', $room) }}" class="text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">{{ $room->room_number }}</a>
+                        <td class="px-4 py-3">
+                            <a href="{{ route('rooms.show', $room) }}" class="flex items-center gap-3">
+                                <x-rooms.thumbnail :room="$room" />
+                                <div>
+                                    <div class="text-sm font-semibold text-indigo-600 dark:text-indigo-400">{{ $room->room_number }}</div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400">{{ $room->roomType->name }}</div>
+                                </div>
+                            </a>
                         </td>
                         <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $room->floor->block->name }}</td>
                         <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $room->floor->name }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $room->roomType->name }}</td>
                         <td class="px-4 py-3 text-sm"><x-rooms.occupancy-badge :room="$room" /></td>
                         <td class="px-4 py-3 text-right text-sm">
                             <a href="{{ route('rooms.show', $room) }}" class="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">View</a>
@@ -92,7 +102,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">No rooms match your search.</td>
+                        <td colspan="5" class="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">No rooms match your search.</td>
                     </tr>
                 @endforelse
             </tbody>

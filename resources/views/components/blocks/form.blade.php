@@ -33,3 +33,16 @@
         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600">{{ old('description', $block->description ?? '') }}</textarea>
     <x-input-error :messages="$errors->get('description')" class="mt-2" />
 </div>
+
+<div class="mt-4">
+    <x-input-label for="photo" value="Block Photo" />
+    <input id="photo" name="photo" type="file" accept="image/*"
+        class="mt-1 block w-full text-sm text-gray-600 file:mr-4 file:rounded-md file:border-0 file:bg-indigo-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-indigo-700 hover:file:bg-indigo-100 dark:text-gray-400 dark:file:bg-indigo-500/10 dark:file:text-indigo-400">
+    <x-input-error :messages="$errors->get('photo')" class="mt-2" />
+    @if ($block?->photoUrl())
+        <div class="mt-2 flex items-center gap-2">
+            <img src="{{ $block->photoUrl() }}" alt="{{ $block->name }}" class="h-12 w-20 rounded-md object-cover">
+            <span class="text-xs text-gray-500 dark:text-gray-400">Current photo — upload a new file to replace it.</span>
+        </div>
+    @endif
+</div>

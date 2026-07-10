@@ -11,6 +11,7 @@ use App\Models\Room;
 use App\Models\RoomType;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class RoomController extends Controller
@@ -95,7 +96,12 @@ class RoomController extends Controller
      */
     public function store(RoomRequest $request): RedirectResponse
     {
-        Room::create($request->validated());
+        $data = $request->validated();
+
+        Room::create([
+            ...collect($data)->except('photo')->toArray(),
+            'photo_path' => $request->hasFile('photo') ? $request->file('photo')->store('room-photos', 'public') : null,
+        ]);
 
         return redirect()->route('rooms.index')->with('status', 'Room created.');
     }
@@ -117,7 +123,21 @@ class RoomController extends Controller
      */
     public function update(RoomRequest $request, Room $room): RedirectResponse
     {
-        $room->update($request->validated());
+        $data = $request->validated();
+        $photoPath = $room->photo_path;
+
+        if ($request->hasFile('photo')) {
+            if ($photoPath) {
+                Storage::disk('public')->delete($photoPath);
+            }
+
+            $photoPath = $request->file('photo')->store('room-photos', 'public');
+        }
+
+        $room->update([
+            ...collect($data)->except('photo')->toArray(),
+            'photo_path' => $photoPath,
+        ]);
 
         return redirect()->route('rooms.index')->with('status', 'Room updated.');
     }
@@ -130,6 +150,10 @@ class RoomController extends Controller
         if ($room->allocations()->exists()) {
             return redirect()->route('rooms.index')
                 ->with('error', "Cannot delete room \"{$room->room_number}\" while it has allocation history.");
+        }
+
+        if ($room->photo_path) {
+            Storage::disk('public')->delete($room->photo_path);
         }
 
         $room->delete();

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 class Room extends Model
 {
@@ -23,6 +24,7 @@ class Room extends Model
         'occupied_beds',
         'status',
         'notes',
+        'photo_path',
     ];
 
     protected function casts(): array
@@ -52,6 +54,11 @@ class Room extends Model
     public function activeAllocations(): HasMany
     {
         return $this->allocations()->where('status', AllocationStatus::Active);
+    }
+
+    public function photoUrl(): ?string
+    {
+        return $this->photo_path ? Storage::disk('public')->url($this->photo_path) : null;
     }
 
     /**

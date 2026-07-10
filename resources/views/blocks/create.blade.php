@@ -2,7 +2,7 @@
     <x-management-tabs active="blocks" />
 
     <div class="max-w-2xl rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
-        <form method="POST" action="{{ route('blocks.store') }}">
+        <form method="POST" action="{{ route('blocks.store') }}" enctype="multipart/form-data">
             @csrf
 
             <x-blocks.form :hostels="$hostels" />

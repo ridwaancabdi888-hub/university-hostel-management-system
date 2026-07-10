@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 class Block extends Model
 {
@@ -18,6 +19,7 @@ class Block extends Model
         'name',
         'code',
         'description',
+        'photo_path',
     ];
 
     public function hostel(): BelongsTo
@@ -28,5 +30,10 @@ class Block extends Model
     public function floors(): HasMany
     {
         return $this->hasMany(Floor::class);
+    }
+
+    public function photoUrl(): ?string
+    {
+        return $this->photo_path ? Storage::disk('public')->url($this->photo_path) : null;
     }
 }

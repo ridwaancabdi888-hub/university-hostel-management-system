@@ -43,6 +43,7 @@ class RoomRequest extends FormRequest
             'capacity' => ['required', 'integer', "min:{$minCapacity}", 'max:20'],
             'status' => ['required', Rule::enum(RoomStatus::class)],
             'notes' => ['nullable', 'string', 'max:1000'],
+            'photo' => ['nullable', 'image', 'max:2048'],
         ];
     }
 }

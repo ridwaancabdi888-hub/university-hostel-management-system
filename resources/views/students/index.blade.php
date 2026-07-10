@@ -9,8 +9,14 @@
     </div>
 
     <form method="GET" action="{{ route('students.index') }}" class="mb-6 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
-        <x-input-label for="search" value="Search" />
-        <x-text-input id="search" name="search" type="text" class="mt-1 block w-full" value="{{ $filters['search'] ?? '' }}" placeholder="Search by name, email, student ID, or course..." />
+        <div class="relative">
+            <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 dark:text-gray-500">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                </svg>
+            </span>
+            <x-text-input id="search" name="search" type="text" class="block w-full !rounded-full !pl-10" value="{{ $filters['search'] ?? '' }}" placeholder="Search by name, email, student ID, or course..." />
+        </div>
 
         <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div>
@@ -64,17 +70,17 @@
             </thead>
             <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                 @forelse ($students as $student)
-                    <tr>
+                    <tr class="transition hover:bg-gray-50 dark:hover:bg-gray-900/40">
                         <td class="px-4 py-3">
                             <a href="{{ route('students.show', $student) }}" class="flex items-center gap-3">
-                                <x-avatar :name="$student->user->name" :url="$student->photoUrl()" size="h-8 w-8" class="text-xs" />
+                                <x-avatar :name="$student->user->name" :url="$student->photoUrl()" size="h-10 w-10" class="text-sm ring-1 ring-gray-200 dark:ring-gray-700" />
                                 <div>
-                                    <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $student->user->name }}</div>
+                                    <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ $student->user->name }}</div>
                                     <div class="text-xs text-gray-500 dark:text-gray-400">{{ $student->user->email }}</div>
                                 </div>
                             </a>
                         </td>
-                        <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $student->student_id }}</td>
+                        <td class="px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $student->student_id }}</td>
                         <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $student->course }}</td>
                         <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $student->year_level->label() }}</td>
                         <td class="px-4 py-3 text-sm"><x-students.status-badge :status="$student->status" /></td>
