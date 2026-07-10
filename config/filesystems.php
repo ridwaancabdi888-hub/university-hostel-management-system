@@ -41,7 +41,13 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
+            // Root-relative rather than APP_URL-prefixed: an absolute URL
+            // bakes in one specific hostname (e.g. "localhost"), which
+            // silently fails the CSP's "img-src 'self'" check — and thus
+            // fails to render — the moment the app is reached via a
+            // different hostname (e.g. "127.0.0.1") or in production
+            // behind a different domain.
+            'url' => '/storage',
             'visibility' => 'public',
             'throw' => false,
             'report' => false,

@@ -6,50 +6,55 @@
 @endphp
 
 <x-dashboard-layout title="Dashboard">
-    <div class="glass-card rounded-lg p-lg">
-        <h2 class="font-headline-sm text-on-surface dark:text-night-on-surface">
-            Welcome back, {{ auth()->user()->name }}.
-        </h2>
-        <p class="mt-1 font-body-md text-on-surface-variant dark:text-night-on-surface-variant">
-            You're signed in as <span class="font-medium text-primary dark:text-night-primary">{{ $role->label() }}</span>.
-        </p>
-    </div>
-
     @if (isset($totalRooms))
-        <div class="mb-md mt-xl flex items-center justify-between">
-            <h3 class="font-headline-sm text-on-surface dark:text-night-on-surface">Housing Overview</h3>
-            <a href="{{ route('blocks.create') }}" class="inline-flex items-center gap-2 rounded-DEFAULT bg-primary px-md py-sm font-label-md text-on-primary hover:shadow-lg hover:shadow-primary/25 dark:bg-night-primary dark:text-night-on-primary transition-all">
+        <div class="sticky top-0 z-10 -mx-4 -mt-4 mb-xl flex flex-wrap items-center gap-x-8 gap-y-3 border-b border-outline-variant/20 bg-surface-container-lowest/80 px-4 py-4 backdrop-blur-xl dark:border-night-border dark:bg-night-surface/80 sm:-mx-6 sm:-mt-6 sm:px-6 lg:-mx-8 lg:-mt-8 lg:px-8">
+            <div class="flex items-center gap-2.5">
+                <span class="material-symbols-outlined text-primary dark:text-night-primary">bed</span>
+                <div>
+                    <p class="font-headline-sm leading-none text-on-surface dark:text-night-on-surface">{{ number_format($totalOccupied) }}<span class="font-body-md font-normal text-outline dark:text-night-on-surface-variant"> / {{ number_format($totalCapacity) }}</span></p>
+                    <p class="font-label-sm text-on-surface-variant dark:text-night-on-surface-variant">{{ $occupancyRate }}% Occupancy</p>
+                </div>
+            </div>
+
+            <div class="hidden h-9 w-px bg-outline-variant/20 dark:bg-night-border sm:block"></div>
+
+            <div class="flex items-center gap-2.5">
+                <span class="material-symbols-outlined text-tertiary dark:text-orange-400">build</span>
+                <div>
+                    <p class="font-headline-sm leading-none text-on-surface dark:text-night-on-surface">{{ number_format($activeMaintenanceCount) }}</p>
+                    <p class="font-label-sm text-on-surface-variant dark:text-night-on-surface-variant">Maintenance Active</p>
+                </div>
+            </div>
+
+            <div class="hidden h-9 w-px bg-outline-variant/20 dark:bg-night-border sm:block"></div>
+
+            <div class="flex items-center gap-2.5">
+                <span class="material-symbols-outlined text-primary dark:text-night-primary">person_add</span>
+                <div>
+                    <p class="font-headline-sm leading-none text-on-surface dark:text-night-on-surface">{{ number_format($pendingVisitorsCount) }}</p>
+                    <p class="font-label-sm text-on-surface-variant dark:text-night-on-surface-variant">Pending Visitors</p>
+                </div>
+            </div>
+
+            @if (isset($monthlyRevenue))
+                <div class="hidden h-9 w-px bg-outline-variant/20 dark:bg-night-border sm:block"></div>
+
+                <div class="flex items-center gap-2.5">
+                    <span class="material-symbols-outlined text-green-600 dark:text-green-400">payments</span>
+                    <div>
+                        <p class="font-headline-sm leading-none text-green-600 dark:text-green-400">${{ number_format($monthlyRevenue, 2) }}</p>
+                        <p class="font-label-sm text-on-surface-variant dark:text-night-on-surface-variant">Monthly Revenue</p>
+                    </div>
+                </div>
+            @endif
+
+            <a href="{{ route('blocks.create') }}" class="ml-auto inline-flex items-center gap-2 rounded-DEFAULT bg-primary px-md py-sm font-label-md text-on-primary hover:shadow-lg hover:shadow-primary/25 dark:bg-night-primary dark:text-night-on-primary transition-all">
                 <span class="material-symbols-outlined text-[18px]">add</span>
                 Register New Block
             </a>
         </div>
 
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div class="glass-card rounded-lg p-md">
-                <p class="font-label-sm uppercase tracking-wide text-on-surface-variant dark:text-night-on-surface-variant">Total Occupancy</p>
-                <p class="mt-2 font-headline-lg text-on-surface dark:text-night-on-surface">{{ number_format($totalOccupied) }} <span class="font-body-md font-normal text-outline dark:text-night-on-surface-variant">/ {{ number_format($totalCapacity) }}</span></p>
-                <p class="mt-1 font-label-sm text-on-surface-variant dark:text-night-on-surface-variant">{{ $occupancyRate }}% of beds filled</p>
-            </div>
-            <div class="glass-card rounded-lg p-md">
-                <p class="font-label-sm uppercase tracking-wide text-on-surface-variant dark:text-night-on-surface-variant">Maintenance Required</p>
-                <p class="mt-2 font-headline-lg text-tertiary dark:text-orange-400">{{ number_format($activeMaintenanceCount) }}</p>
-                <p class="mt-1 font-label-sm text-on-surface-variant dark:text-night-on-surface-variant">Active requests</p>
-            </div>
-            <div class="glass-card rounded-lg p-md">
-                <p class="font-label-sm uppercase tracking-wide text-on-surface-variant dark:text-night-on-surface-variant">Pending Visitors</p>
-                <p class="mt-2 font-headline-lg text-on-surface dark:text-night-on-surface">{{ number_format($pendingVisitorsCount) }}</p>
-                <p class="mt-1 font-label-sm text-on-surface-variant dark:text-night-on-surface-variant">Awaiting approval</p>
-            </div>
-            @if (isset($monthlyRevenue))
-                <div class="glass-card rounded-lg p-md">
-                    <p class="font-label-sm uppercase tracking-wide text-on-surface-variant dark:text-night-on-surface-variant">Monthly Revenue</p>
-                    <p class="mt-2 font-headline-lg text-green-600 dark:text-green-400">${{ number_format($monthlyRevenue, 2) }}</p>
-                    <p class="mt-1 font-label-sm text-on-surface-variant dark:text-night-on-surface-variant">Collected this month</p>
-                </div>
-            @endif
-        </div>
-
-        <h3 class="mb-md mt-xl font-headline-sm text-on-surface dark:text-night-on-surface">Residential Blocks</h3>
+        <h3 class="mb-md font-headline-sm text-on-surface dark:text-night-on-surface">Residential Blocks</h3>
         <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             @forelse ($blockCards as $block)
                 @php
@@ -107,7 +112,7 @@
             @endforelse
         </div>
     @elseif (isset($monthlyRevenue))
-        <h3 class="mb-md mt-xl font-headline-sm text-on-surface dark:text-night-on-surface">Financial Snapshot</h3>
+        <h3 class="mb-md font-headline-sm text-on-surface dark:text-night-on-surface">Financial Snapshot</h3>
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div class="glass-card rounded-lg p-md">
                 <p class="font-label-sm uppercase tracking-wide text-on-surface-variant dark:text-night-on-surface-variant">Monthly Revenue</p>
@@ -121,7 +126,7 @@
             </div>
         </div>
     @elseif ($role === \App\Enums\Role::Student)
-        <h3 class="mb-md mt-xl font-headline-sm text-on-surface dark:text-night-on-surface">My Room</h3>
+        <h3 class="mb-md font-headline-sm text-on-surface dark:text-night-on-surface">My Room</h3>
 
         @if ($profilePending)
             <div class="glass-card rounded-lg p-lg">
