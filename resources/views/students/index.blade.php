@@ -1,21 +1,20 @@
 <x-dashboard-layout title="Student Directory">
     <div class="mb-4 flex items-center justify-between">
-        <p class="text-sm text-gray-500 dark:text-gray-400">Manage student records, enrollment, and profile information.</p>
+        <p class="font-body-md text-on-surface-variant dark:text-night-on-surface-variant">Manage student records, enrollment, and profile information.</p>
         @if (auth()->user()->role !== \App\Enums\Role::Accountant)
-            <a href="{{ route('students.create') }}" class="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white hover:bg-indigo-500">
+            <a href="{{ route('students.create') }}" class="inline-flex items-center gap-2 rounded-DEFAULT bg-primary px-md py-sm font-label-md text-on-primary hover:shadow-lg hover:shadow-primary/25 dark:bg-night-primary dark:text-night-on-primary transition-all">
+                <span class="material-symbols-outlined text-[18px]">person_add</span>
                 Add New Student
             </a>
         @endif
     </div>
 
-    <form method="GET" action="{{ route('students.index') }}" class="mb-6 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+    <form method="GET" action="{{ route('students.index') }}" class="glass-card mb-6 rounded-lg p-md">
         <div class="relative">
-            <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 dark:text-gray-500">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                </svg>
+            <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-outline dark:text-night-on-surface-variant">
+                <span class="material-symbols-outlined text-[20px]">search</span>
             </span>
-            <x-text-input id="search" name="search" type="text" class="block w-full !rounded-full !pl-10" value="{{ $filters['search'] ?? '' }}" placeholder="Search by name, email, student ID, or course..." />
+            <x-text-input id="search" name="search" type="text" class="block w-full !rounded-full !pl-11" value="{{ $filters['search'] ?? '' }}" placeholder="Search by name, email, student ID, or course..." />
         </div>
 
         <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -52,49 +51,49 @@
 
         <div class="mt-4 flex items-center gap-3">
             <x-primary-button type="submit">Apply Filters</x-primary-button>
-            <a href="{{ route('students.index') }}" class="text-sm font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">Reset</a>
+            <a href="{{ route('students.index') }}" class="font-label-md text-on-surface-variant hover:text-on-surface dark:text-night-on-surface-variant dark:hover:text-night-on-surface">Reset</a>
         </div>
     </form>
 
-    <div class="overflow-x-auto rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
-        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead class="bg-gray-50 dark:bg-gray-900/50">
+    <div class="glass-card overflow-x-auto rounded-lg">
+        <table class="min-w-full divide-y divide-outline-variant/15 dark:divide-night-border">
+            <thead class="bg-secondary-container/20 dark:bg-night-surface-high/50">
                 <tr>
-                    <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Student</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Student ID</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Course</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Year</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</th>
-                    <th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Actions</th>
+                    <th class="px-4 py-3 text-left font-label-sm uppercase tracking-wider text-on-surface-variant dark:text-night-on-surface-variant">Student</th>
+                    <th class="px-4 py-3 text-left font-label-sm uppercase tracking-wider text-on-surface-variant dark:text-night-on-surface-variant">Student ID</th>
+                    <th class="px-4 py-3 text-left font-label-sm uppercase tracking-wider text-on-surface-variant dark:text-night-on-surface-variant">Course</th>
+                    <th class="px-4 py-3 text-left font-label-sm uppercase tracking-wider text-on-surface-variant dark:text-night-on-surface-variant">Year</th>
+                    <th class="px-4 py-3 text-left font-label-sm uppercase tracking-wider text-on-surface-variant dark:text-night-on-surface-variant">Status</th>
+                    <th class="px-4 py-3 text-right font-label-sm uppercase tracking-wider text-on-surface-variant dark:text-night-on-surface-variant">Actions</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody class="divide-y divide-outline-variant/15 dark:divide-night-border">
                 @forelse ($students as $student)
-                    <tr class="transition hover:bg-gray-50 dark:hover:bg-gray-900/40">
+                    <tr class="transition hover:bg-secondary-container/10 dark:hover:bg-night-surface-high/40">
                         <td class="px-4 py-3">
                             <a href="{{ route('students.show', $student) }}" class="flex items-center gap-3">
-                                <x-avatar :name="$student->user->name" :url="$student->photoUrl()" size="h-10 w-10" class="text-sm ring-1 ring-gray-200 dark:ring-gray-700" />
+                                <x-avatar :name="$student->user->name" :url="$student->photoUrl()" size="h-10 w-10" class="ring-1 ring-outline-variant/30 dark:ring-night-border" />
                                 <div>
-                                    <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ $student->user->name }}</div>
-                                    <div class="text-xs text-gray-500 dark:text-gray-400">{{ $student->user->email }}</div>
+                                    <div class="font-label-md font-semibold text-on-surface dark:text-night-on-surface">{{ $student->user->name }}</div>
+                                    <div class="font-label-sm text-on-surface-variant dark:text-night-on-surface-variant">{{ $student->user->email }}</div>
                                 </div>
                             </a>
                         </td>
-                        <td class="px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $student->student_id }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $student->course }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $student->year_level->label() }}</td>
-                        <td class="px-4 py-3 text-sm"><x-students.status-badge :status="$student->status" /></td>
-                        <td class="px-4 py-3 text-right text-sm">
-                            <a href="{{ route('students.show', $student) }}" class="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">View</a>
+                        <td class="px-4 py-3 font-label-md font-medium text-on-surface-variant dark:text-night-on-surface-variant">{{ $student->student_id }}</td>
+                        <td class="px-4 py-3 font-body-md text-on-surface-variant dark:text-night-on-surface-variant">{{ $student->course }}</td>
+                        <td class="px-4 py-3 font-body-md text-on-surface-variant dark:text-night-on-surface-variant">{{ $student->year_level->label() }}</td>
+                        <td class="px-4 py-3"><x-students.status-badge :status="$student->status" /></td>
+                        <td class="px-4 py-3 text-right font-label-md">
+                            <a href="{{ route('students.show', $student) }}" class="font-medium text-primary hover:underline dark:text-night-primary">View</a>
                             @if (auth()->user()->role !== \App\Enums\Role::Accountant)
-                                <span class="mx-2 text-gray-300 dark:text-gray-600">|</span>
-                                <a href="{{ route('students.edit', $student) }}" class="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">Edit</a>
+                                <span class="mx-2 text-outline-variant dark:text-night-border">|</span>
+                                <a href="{{ route('students.edit', $student) }}" class="font-medium text-primary hover:underline dark:text-night-primary">Edit</a>
                             @endif
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">No students match your search.</td>
+                        <td colspan="6" class="px-4 py-6 text-center font-body-md text-on-surface-variant dark:text-night-on-surface-variant">No students match your search.</td>
                     </tr>
                 @endforelse
             </tbody>

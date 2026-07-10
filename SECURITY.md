@@ -24,7 +24,7 @@ We aim to acknowledge reports within 3 business days.
 The CSP shipped in `SecurityHeaders` allows `'unsafe-inline'` and `'unsafe-eval'` in `script-src`. This is a deliberate, scoped trade-off: the app has a small number of inline `<script>` blocks (a dark-mode toggle in the shared layout, and per-report Chart.js initialization) and uses Alpine.js, which evaluates directive expressions at runtime. Both would break under a strict nonce-based CSP without further work.
 
 The policy still meaningfully blocks:
-- Script/style loading from any origin other than `'self'` and the two explicitly trusted CDNs (`cdn.jsdelivr.net` for Chart.js, `fonts.bunny.net` for fonts)
+- Script/style loading from any origin other than `'self'` and the one explicitly trusted CDN (`cdn.jsdelivr.net` for Chart.js) — fonts (Geist, Material Symbols) are self-hosted under `/fonts`, so no font CDN is trusted at all
 - Framing by other sites (`frame-ancestors 'none'`)
 - `<object>`/plugin content and base-tag hijacking
 

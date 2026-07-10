@@ -4,7 +4,7 @@
 
 <div class="space-y-8">
     <section>
-        <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Account</h3>
+        <h3 class="font-label-sm uppercase tracking-wide text-on-surface-variant dark:text-night-on-surface-variant">Account</h3>
         <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
                 <x-input-label for="name" value="Full Name" />
@@ -30,12 +30,12 @@
             <div>
                 <x-input-label for="photo" value="Student Photo" />
                 <input id="photo" name="photo" type="file" accept="image/*"
-                    class="mt-1 block w-full text-sm text-gray-600 file:mr-4 file:rounded-md file:border-0 file:bg-indigo-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-indigo-700 hover:file:bg-indigo-100 dark:text-gray-400 dark:file:bg-indigo-500/10 dark:file:text-indigo-400">
+                    class="mt-1 block w-full font-body-md text-on-surface-variant file:mr-4 file:rounded-DEFAULT file:border-0 file:bg-secondary-container/50 file:px-4 file:py-2 file:font-label-md file:font-semibold file:text-primary hover:file:bg-secondary-container dark:text-night-on-surface-variant dark:file:bg-night-secondary-container dark:file:text-night-primary">
                 <x-input-error :messages="$errors->get('photo')" class="mt-2" />
                 @if ($student?->photoUrl())
                     <div class="mt-2 flex items-center gap-2">
                         <x-avatar :name="$user->name" :url="$student->photoUrl()" size="h-10 w-10" />
-                        <span class="text-xs text-gray-500 dark:text-gray-400">Current photo — upload a new file to replace it.</span>
+                        <span class="font-label-sm text-on-surface-variant dark:text-night-on-surface-variant">Current photo — upload a new file to replace it.</span>
                     </div>
                 @endif
             </div>
@@ -43,7 +43,7 @@
     </section>
 
     <section>
-        <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">University Details</h3>
+        <h3 class="font-label-sm uppercase tracking-wide text-on-surface-variant dark:text-night-on-surface-variant">University Details</h3>
         <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
                 <x-input-label for="student_id" value="Student ID" />
@@ -87,7 +87,7 @@
     </section>
 
     <section>
-        <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Profile</h3>
+        <h3 class="font-label-sm uppercase tracking-wide text-on-surface-variant dark:text-night-on-surface-variant">Profile</h3>
         <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
                 <x-input-label for="date_of_birth" value="Date of Birth" />
@@ -126,7 +126,7 @@
     </section>
 
     <section>
-        <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Guardian Information</h3>
+        <h3 class="font-label-sm uppercase tracking-wide text-on-surface-variant dark:text-night-on-surface-variant">Guardian Information</h3>
         <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
                 <x-input-label for="guardian_name" value="Guardian Name" />
@@ -167,7 +167,7 @@
     </section>
 
     <section>
-        <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Emergency Contact</h3>
+        <h3 class="font-label-sm uppercase tracking-wide text-on-surface-variant dark:text-night-on-surface-variant">Emergency Contact</h3>
         <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
                 <x-input-label for="emergency_contact_name" value="Contact Name" />

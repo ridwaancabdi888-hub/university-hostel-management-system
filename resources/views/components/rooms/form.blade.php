@@ -41,13 +41,13 @@
             :value="old('capacity', $room->capacity ?? '')" />
         <x-input-error :messages="$errors->get('capacity')" class="mt-2" />
         @if ($room && $room->occupied_beds > 0)
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Can't be set below {{ $room->occupied_beds }} — the beds currently occupied.</p>
+            <p class="mt-1 font-label-sm text-on-surface-variant dark:text-night-on-surface-variant">Can't be set below {{ $room->occupied_beds }} — the beds currently occupied.</p>
         @endif
     </div>
 
     <div>
         <x-input-label value="Occupied Beds" />
-        <p class="mt-1 block w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400">
+        <p class="mt-1 flex h-[48px] w-full items-center rounded-DEFAULT border-2 border-outline-variant/30 bg-surface-container px-sm font-body-md text-on-surface-variant dark:border-night-border dark:bg-night-surface-high dark:text-night-on-surface-variant">
             {{ $room->occupied_beds ?? 0 }} — updates automatically from allocations
         </p>
     </div>
@@ -68,19 +68,19 @@
 <div class="mt-4">
     <x-input-label for="notes" value="Notes" />
     <textarea id="notes" name="notes" rows="3"
-        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600">{{ old('notes', $room->notes ?? '') }}</textarea>
+        class="mt-1 block w-full rounded-DEFAULT border-2 border-outline-variant/40 bg-surface-container-lowest px-sm py-2 font-body-md text-on-surface shadow-none focus:border-primary focus:ring-0 dark:border-night-border dark:bg-night-surface dark:text-night-on-surface dark:focus:border-night-primary">{{ old('notes', $room->notes ?? '') }}</textarea>
     <x-input-error :messages="$errors->get('notes')" class="mt-2" />
 </div>
 
 <div class="mt-4">
     <x-input-label for="photo" value="Room Photo" />
     <input id="photo" name="photo" type="file" accept="image/*"
-        class="mt-1 block w-full text-sm text-gray-600 file:mr-4 file:rounded-md file:border-0 file:bg-indigo-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-indigo-700 hover:file:bg-indigo-100 dark:text-gray-400 dark:file:bg-indigo-500/10 dark:file:text-indigo-400">
+        class="mt-1 block w-full font-body-md text-on-surface-variant file:mr-4 file:rounded-DEFAULT file:border-0 file:bg-secondary-container/50 file:px-4 file:py-2 file:font-label-md file:font-semibold file:text-primary hover:file:bg-secondary-container dark:text-night-on-surface-variant dark:file:bg-night-secondary-container dark:file:text-night-primary">
     <x-input-error :messages="$errors->get('photo')" class="mt-2" />
     @if ($room?->photoUrl())
         <div class="mt-2 flex items-center gap-2">
-            <img src="{{ $room->photoUrl() }}" alt="{{ $room->room_number }}" class="h-12 w-16 rounded-md object-cover">
-            <span class="text-xs text-gray-500 dark:text-gray-400">Current photo — upload a new file to replace it.</span>
+            <img src="{{ $room->photoUrl() }}" alt="{{ $room->room_number }}" class="h-12 w-16 rounded-DEFAULT object-cover">
+            <span class="font-label-sm text-on-surface-variant dark:text-night-on-surface-variant">Current photo — upload a new file to replace it.</span>
         </div>
     @endif
 </div>

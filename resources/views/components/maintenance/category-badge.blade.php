@@ -7,6 +7,6 @@
     ];
 @endphp
 
-<span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium {{ $classes[$category->value] }}">
+<span class="inline-flex items-center rounded-full px-sm py-1 font-label-sm {{ $classes[$category->value] }}">
     {{ $category->label() }}
 </span>

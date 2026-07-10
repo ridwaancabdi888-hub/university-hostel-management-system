@@ -9,19 +9,22 @@ use Symfony\Component\HttpFoundation\Response;
 class SecurityHeaders
 {
     /**
-     * A pragmatic Content-Security-Policy: it whitelists the two CDNs this
-     * app already trusts (Chart.js, Bunny Fonts) and allows 'unsafe-inline'/
-     * 'unsafe-eval' because the app ships a handful of inline <script>
-     * blocks (dark-mode toggle, per-report Chart.js init) and uses Alpine.js
-     * (which evaluates directive expressions at runtime). A strict
-     * nonce-based CSP would require refactoring those views and switching
-     * to Alpine's CSP-safe build — tracked as a known follow-up in
-     * SECURITY.md rather than silently accepted risk.
+     * A pragmatic Content-Security-Policy: it whitelists the one CDN this
+     * app still trusts (Chart.js) and allows 'unsafe-inline'/'unsafe-eval'
+     * because the app ships a handful of inline <script> blocks (dark-mode
+     * toggle, per-report Chart.js init) and uses Alpine.js (which evaluates
+     * directive expressions at runtime). A strict nonce-based CSP would
+     * require refactoring those views and switching to Alpine's CSP-safe
+     * build — tracked as a known follow-up in SECURITY.md rather than
+     * silently accepted risk.
+     *
+     * Fonts (Geist, Material Symbols) are self-hosted under /fonts — no
+     * third-party font CDN is needed, so font-src/style-src stay 'self'-only.
      */
     private const CSP = "default-src 'self'; ".
         "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; ".
-        "style-src 'self' 'unsafe-inline' https://fonts.bunny.net; ".
-        "font-src 'self' https://fonts.bunny.net; ".
+        "style-src 'self' 'unsafe-inline'; ".
+        "font-src 'self'; ".
         "img-src 'self' data:; ".
         "connect-src 'self'; ".
         "frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'";

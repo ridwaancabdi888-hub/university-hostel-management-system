@@ -1,7 +1,7 @@
 <x-dashboard-layout title="Add Room">
     <x-management-tabs active="rooms" />
 
-    <div class="max-w-2xl rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+    <div class="glass-card max-w-2xl rounded-lg p-lg">
         <form method="POST" action="{{ route('rooms.store') }}" enctype="multipart/form-data">
             @csrf
 

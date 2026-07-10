@@ -18,10 +18,6 @@
             }
         </script>
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
@@ -36,7 +32,7 @@
             document.documentElement.classList.toggle('dark', value);
         })"
     >
-        <div class="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-900">
+        <div class="flex h-screen overflow-hidden bg-background dark:bg-night-bg">
             <x-sidebar />
 
             <div class="flex flex-1 flex-col overflow-hidden">
@@ -44,13 +40,13 @@
 
                 <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
                     @if (session('status'))
-                        <div class="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700 dark:border-green-800 dark:bg-green-500/10 dark:text-green-400">
+                        <div class="mb-6 rounded-DEFAULT border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700 dark:border-green-800 dark:bg-green-500/10 dark:text-green-400">
                             {{ session('status') }}
                         </div>
                     @endif
 
                     @if (session('error'))
-                        <div class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-500/10 dark:text-red-400">
+                        <div class="mb-6 rounded-DEFAULT border border-error/20 bg-error-container px-4 py-3 text-sm text-on-error-container dark:border-night-error/30 dark:bg-night-error-container dark:text-night-error">
                             {{ session('error') }}
                         </div>
                     @endif

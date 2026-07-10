@@ -11,15 +11,15 @@
     ];
 @endphp
 
-<div class="mb-6 border-b border-gray-200 dark:border-gray-700">
+<div class="mb-6 border-b border-outline-variant/20 dark:border-night-border">
     <nav class="-mb-px flex gap-6 overflow-x-auto">
         @foreach ($tabs as $key => $tab)
             <a
                 href="{{ route($tab['route']) }}"
                 @class([
-                    'whitespace-nowrap border-b-2 px-1 py-3 text-sm font-medium',
-                    'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400' => $active === $key,
-                    'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200' => $active !== $key,
+                    'whitespace-nowrap border-b-2 px-1 py-3 font-label-md',
+                    'border-primary text-primary dark:border-night-primary dark:text-night-primary' => $active === $key,
+                    'border-transparent text-on-surface-variant hover:border-outline-variant hover:text-on-surface dark:text-night-on-surface-variant dark:hover:text-night-on-surface' => $active !== $key,
                 ])
             >
                 {{ $tab['label'] }}

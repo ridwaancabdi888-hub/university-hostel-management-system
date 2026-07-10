@@ -25,7 +25,7 @@
     ];
 @endphp
 
-<span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium {{ $classes[$state] }}">
+<span class="inline-flex items-center gap-1.5 rounded-full px-sm py-1 font-label-sm {{ $classes[$state] }}">
     <span class="h-1.5 w-1.5 rounded-full {{ $dots[$state] }}"></span>
     {{ $labels[$state] }}
     @if ($state !== 'unavailable')

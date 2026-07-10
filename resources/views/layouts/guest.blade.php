@@ -16,23 +16,27 @@
             }
         </script>
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100 dark:bg-gray-900">
-            <div>
-                <a href="/">
-                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
-                </a>
+    <body class="font-sans text-on-background dark:text-night-on-surface antialiased">
+        <div class="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background px-margin-mobile py-xl dark:bg-night-bg md:px-margin-desktop">
+            <!-- Atmospheric background layers -->
+            <div class="pointer-events-none absolute inset-0 z-0">
+                <div class="absolute -right-[5%] -top-[10%] h-[500px] w-[500px] rounded-full bg-secondary-container/20 blur-[120px] dark:bg-night-secondary-container/30"></div>
+                <div class="absolute -left-[5%] -bottom-[10%] h-[600px] w-[600px] rounded-full bg-primary/5 blur-[100px] dark:bg-night-primary/10"></div>
             </div>
 
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-lg">
-                {{ $slot }}
+            <div class="relative z-10 flex w-full max-w-[480px] flex-col items-center gap-md">
+                <a href="{{ route('login') }}" class="flex flex-col items-center gap-base text-center">
+                    <span class="flex h-16 w-16 animate-float items-center justify-center rounded-xl bg-primary shadow-lg shadow-primary/20 dark:bg-night-primary dark:shadow-night-primary/20">
+                        <span class="material-symbols-outlined text-[32px] text-on-primary dark:text-night-on-primary">school</span>
+                    </span>
+                </a>
+
+                <div class="glass-card flex w-full flex-col gap-lg rounded-lg p-lg md:p-xl">
+                    {{ $slot }}
+                </div>
             </div>
         </div>
     </body>

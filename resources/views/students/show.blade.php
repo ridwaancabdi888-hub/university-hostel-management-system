@@ -1,8 +1,9 @@
 <x-dashboard-layout :title="$student->user->name">
     <div class="mb-4 flex items-center justify-between">
-        <a href="{{ route('students.index') }}" class="text-sm font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">&larr; Back to Student Directory</a>
+        <a href="{{ route('students.index') }}" class="font-label-md text-on-surface-variant hover:text-on-surface dark:text-night-on-surface-variant dark:hover:text-night-on-surface">&larr; Back to Student Directory</a>
         <div class="flex items-center gap-3">
-            <a href="{{ route('students.edit', $student) }}" class="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white hover:bg-indigo-500">
+            <a href="{{ route('students.edit', $student) }}" class="inline-flex items-center gap-2 rounded-DEFAULT bg-primary px-md py-sm font-label-md text-on-primary hover:shadow-lg hover:shadow-primary/25 dark:bg-night-primary dark:text-night-on-primary transition-all">
+                <span class="material-symbols-outlined text-[18px]">edit</span>
                 Edit Student
             </a>
             <x-delete-button :action="route('students.destroy', $student)" confirm="Remove this student? This also deletes their login account.">
@@ -11,55 +12,55 @@
         </div>
     </div>
 
-    <div class="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+    <div class="glass-card rounded-lg p-lg">
         <div class="flex flex-col items-start gap-6 sm:flex-row">
-            <x-avatar :name="$student->user->name" :url="$student->photoUrl()" size="h-20 w-20" class="text-2xl" />
+            <x-avatar :name="$student->user->name" :url="$student->photoUrl()" size="h-20 w-20" class="text-2xl ring-2 ring-outline-variant/30 dark:ring-night-border" />
 
             <div class="flex-1">
                 <div class="flex flex-wrap items-center gap-3">
-                    <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">{{ $student->user->name }}</h2>
+                    <h2 class="font-headline-sm text-on-surface dark:text-night-on-surface">{{ $student->user->name }}</h2>
                     <x-students.status-badge :status="$student->status" />
                 </div>
-                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ $student->user->email }}</p>
+                <p class="mt-1 font-body-md text-on-surface-variant dark:text-night-on-surface-variant">{{ $student->user->email }}</p>
 
                 <dl class="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
                     <div>
-                        <dt class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Student ID</dt>
-                        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $student->student_id }}</dd>
+                        <dt class="font-label-sm uppercase tracking-wide text-on-surface-variant dark:text-night-on-surface-variant">Student ID</dt>
+                        <dd class="mt-1 font-body-md text-on-surface dark:text-night-on-surface">{{ $student->student_id }}</dd>
                     </div>
                     <div>
-                        <dt class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Course</dt>
-                        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $student->course }}</dd>
+                        <dt class="font-label-sm uppercase tracking-wide text-on-surface-variant dark:text-night-on-surface-variant">Course</dt>
+                        <dd class="mt-1 font-body-md text-on-surface dark:text-night-on-surface">{{ $student->course }}</dd>
                     </div>
                     <div>
-                        <dt class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Year Level</dt>
-                        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $student->year_level->label() }}</dd>
+                        <dt class="font-label-sm uppercase tracking-wide text-on-surface-variant dark:text-night-on-surface-variant">Year Level</dt>
+                        <dd class="mt-1 font-body-md text-on-surface dark:text-night-on-surface">{{ $student->year_level->label() }}</dd>
                     </div>
                     <div>
-                        <dt class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Phone</dt>
-                        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $student->phone ?? '—' }}</dd>
+                        <dt class="font-label-sm uppercase tracking-wide text-on-surface-variant dark:text-night-on-surface-variant">Phone</dt>
+                        <dd class="mt-1 font-body-md text-on-surface dark:text-night-on-surface">{{ $student->phone ?? '—' }}</dd>
                     </div>
                 </dl>
             </div>
         </div>
     </div>
 
-    <div class="mt-6 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
-        <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Housing</h3>
+    <div class="glass-card mt-6 rounded-lg p-lg">
+        <h3 class="font-label-sm uppercase tracking-wide text-on-surface-variant dark:text-night-on-surface-variant">Housing</h3>
 
         @if ($student->activeAllocation)
             <div class="mt-4 flex flex-wrap items-center justify-between gap-4">
                 <div>
-                    <a href="{{ route('rooms.show', $student->activeAllocation->room) }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">
+                    <a href="{{ route('rooms.show', $student->activeAllocation->room) }}" class="font-label-md font-medium text-primary hover:underline dark:text-night-primary">
                         {{ $student->activeAllocation->room->room_number }} — Bed {{ $student->activeAllocation->bed_number }}
                     </a>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">
-                        {{ $student->activeAllocation->room->floor->block->name }} ({{ $student->activeAllocation->room->floor->block->hostel->name }}) · Since {{ $student->activeAllocation->allocated_at->format('M j, Y') }}
+                    <p class="font-label-sm text-on-surface-variant dark:text-night-on-surface-variant">
+                        {{ $student->activeAllocation->room->floor->block->name }} ({{ $student->activeAllocation->room->floor->block->hostel->name }}) &middot; Since {{ $student->activeAllocation->allocated_at->format('M j, Y') }}
                     </p>
                 </div>
                 @if (auth()->user()->role !== \App\Enums\Role::Accountant)
                     <div class="flex items-center gap-3">
-                        <a href="{{ route('allocations.transfer.form', $student->activeAllocation) }}" class="inline-flex items-center rounded-md bg-white px-3 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 shadow-sm ring-1 ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-600 dark:hover:bg-gray-700">
+                        <a href="{{ route('allocations.transfer.form', $student->activeAllocation) }}" class="inline-flex items-center rounded-DEFAULT border border-outline-variant/40 bg-surface-container-lowest px-3 py-2 font-label-md text-on-surface-variant hover:bg-secondary-container/30 dark:border-night-border dark:bg-night-surface-high dark:text-night-on-surface-variant dark:hover:bg-night-surface">
                             Transfer
                         </a>
                         <x-delete-button :action="route('allocations.vacate', $student->activeAllocation)" confirm="Vacate this student's room?">
@@ -70,9 +71,9 @@
             </div>
         @else
             <div class="mt-4 flex items-center justify-between gap-4">
-                <p class="text-sm text-gray-500 dark:text-gray-400">Not currently allocated to a room.</p>
+                <p class="font-body-md text-on-surface-variant dark:text-night-on-surface-variant">Not currently allocated to a room.</p>
                 @if (auth()->user()->role !== \App\Enums\Role::Accountant)
-                    <a href="{{ route('allocations.create', ['student_profile_id' => $student->id]) }}" class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-white hover:bg-indigo-500">
+                    <a href="{{ route('allocations.create', ['student_profile_id' => $student->id]) }}" class="inline-flex items-center gap-2 rounded-DEFAULT bg-primary px-3 py-2 font-label-md text-on-primary dark:bg-night-primary dark:text-night-on-primary">
                         Allocate Room
                     </a>
                 @endif
@@ -80,25 +81,25 @@
         @endif
 
         @if ($allocationHistory->isNotEmpty())
-            <div class="mt-6 overflow-x-auto border-t border-gray-200 pt-4 dark:border-gray-700">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <div class="mt-6 overflow-x-auto border-t border-outline-variant/20 pt-4 dark:border-night-border">
+                <table class="min-w-full divide-y divide-outline-variant/15 dark:divide-night-border">
                     <thead>
                         <tr>
-                            <th class="px-2 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Room</th>
-                            <th class="px-2 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Bed</th>
-                            <th class="px-2 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Allocated</th>
-                            <th class="px-2 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Vacated</th>
-                            <th class="px-2 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</th>
+                            <th class="px-2 py-2 text-left font-label-sm uppercase tracking-wider text-on-surface-variant dark:text-night-on-surface-variant">Room</th>
+                            <th class="px-2 py-2 text-left font-label-sm uppercase tracking-wider text-on-surface-variant dark:text-night-on-surface-variant">Bed</th>
+                            <th class="px-2 py-2 text-left font-label-sm uppercase tracking-wider text-on-surface-variant dark:text-night-on-surface-variant">Allocated</th>
+                            <th class="px-2 py-2 text-left font-label-sm uppercase tracking-wider text-on-surface-variant dark:text-night-on-surface-variant">Vacated</th>
+                            <th class="px-2 py-2 text-left font-label-sm uppercase tracking-wider text-on-surface-variant dark:text-night-on-surface-variant">Status</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                    <tbody class="divide-y divide-outline-variant/15 dark:divide-night-border">
                         @foreach ($allocationHistory as $entry)
                             <tr>
-                                <td class="px-2 py-2 text-sm text-gray-900 dark:text-gray-100">{{ $entry->room->room_number }}</td>
-                                <td class="px-2 py-2 text-sm text-gray-500 dark:text-gray-400">{{ $entry->bed_number }}</td>
-                                <td class="px-2 py-2 text-sm text-gray-500 dark:text-gray-400">{{ $entry->allocated_at->format('M j, Y') }}</td>
-                                <td class="px-2 py-2 text-sm text-gray-500 dark:text-gray-400">{{ $entry->vacated_at?->format('M j, Y') ?? '—' }}</td>
-                                <td class="px-2 py-2 text-sm"><x-allocations.status-badge :status="$entry->status" /></td>
+                                <td class="px-2 py-2 font-body-md text-on-surface dark:text-night-on-surface">{{ $entry->room->room_number }}</td>
+                                <td class="px-2 py-2 font-body-md text-on-surface-variant dark:text-night-on-surface-variant">{{ $entry->bed_number }}</td>
+                                <td class="px-2 py-2 font-body-md text-on-surface-variant dark:text-night-on-surface-variant">{{ $entry->allocated_at->format('M j, Y') }}</td>
+                                <td class="px-2 py-2 font-body-md text-on-surface-variant dark:text-night-on-surface-variant">{{ $entry->vacated_at?->format('M j, Y') ?? '—' }}</td>
+                                <td class="px-2 py-2"><x-allocations.status-badge :status="$entry->status" /></td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -108,64 +109,64 @@
     </div>
 
     <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div class="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
-            <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Profile</h3>
-            <dl class="mt-4 space-y-3 text-sm">
+        <div class="glass-card rounded-lg p-lg">
+            <h3 class="font-label-sm uppercase tracking-wide text-on-surface-variant dark:text-night-on-surface-variant">Profile</h3>
+            <dl class="mt-4 space-y-3 font-body-md">
                 <div>
-                    <dt class="text-gray-500 dark:text-gray-400">Date of Birth</dt>
-                    <dd class="text-gray-900 dark:text-gray-100">{{ $student->date_of_birth?->format('M j, Y') ?? '—' }}</dd>
+                    <dt class="text-on-surface-variant dark:text-night-on-surface-variant">Date of Birth</dt>
+                    <dd class="text-on-surface dark:text-night-on-surface">{{ $student->date_of_birth?->format('M j, Y') ?? '—' }}</dd>
                 </div>
                 <div>
-                    <dt class="text-gray-500 dark:text-gray-400">Gender</dt>
-                    <dd class="text-gray-900 dark:text-gray-100">{{ $student->gender?->label() ?? '—' }}</dd>
+                    <dt class="text-on-surface-variant dark:text-night-on-surface-variant">Gender</dt>
+                    <dd class="text-on-surface dark:text-night-on-surface">{{ $student->gender?->label() ?? '—' }}</dd>
                 </div>
                 <div>
-                    <dt class="text-gray-500 dark:text-gray-400">Address</dt>
-                    <dd class="text-gray-900 dark:text-gray-100">{{ $student->address ?? '—' }}</dd>
-                </div>
-            </dl>
-        </div>
-
-        <div class="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
-            <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Guardian Information</h3>
-            <dl class="mt-4 space-y-3 text-sm">
-                <div>
-                    <dt class="text-gray-500 dark:text-gray-400">Name</dt>
-                    <dd class="text-gray-900 dark:text-gray-100">{{ $student->guardian_name ?? '—' }}</dd>
-                </div>
-                <div>
-                    <dt class="text-gray-500 dark:text-gray-400">Relationship</dt>
-                    <dd class="text-gray-900 dark:text-gray-100">{{ $student->guardian_relationship ?? '—' }}</dd>
-                </div>
-                <div>
-                    <dt class="text-gray-500 dark:text-gray-400">Phone</dt>
-                    <dd class="text-gray-900 dark:text-gray-100">{{ $student->guardian_phone ?? '—' }}</dd>
-                </div>
-                <div>
-                    <dt class="text-gray-500 dark:text-gray-400">Email</dt>
-                    <dd class="text-gray-900 dark:text-gray-100">{{ $student->guardian_email ?? '—' }}</dd>
-                </div>
-                <div>
-                    <dt class="text-gray-500 dark:text-gray-400">Address</dt>
-                    <dd class="text-gray-900 dark:text-gray-100">{{ $student->guardian_address ?? '—' }}</dd>
+                    <dt class="text-on-surface-variant dark:text-night-on-surface-variant">Address</dt>
+                    <dd class="text-on-surface dark:text-night-on-surface">{{ $student->address ?? '—' }}</dd>
                 </div>
             </dl>
         </div>
 
-        <div class="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
-            <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Emergency Contact</h3>
-            <dl class="mt-4 space-y-3 text-sm">
+        <div class="glass-card rounded-lg p-lg">
+            <h3 class="font-label-sm uppercase tracking-wide text-on-surface-variant dark:text-night-on-surface-variant">Guardian Information</h3>
+            <dl class="mt-4 space-y-3 font-body-md">
                 <div>
-                    <dt class="text-gray-500 dark:text-gray-400">Name</dt>
-                    <dd class="text-gray-900 dark:text-gray-100">{{ $student->emergency_contact_name ?? '—' }}</dd>
+                    <dt class="text-on-surface-variant dark:text-night-on-surface-variant">Name</dt>
+                    <dd class="text-on-surface dark:text-night-on-surface">{{ $student->guardian_name ?? '—' }}</dd>
                 </div>
                 <div>
-                    <dt class="text-gray-500 dark:text-gray-400">Relationship</dt>
-                    <dd class="text-gray-900 dark:text-gray-100">{{ $student->emergency_contact_relationship ?? '—' }}</dd>
+                    <dt class="text-on-surface-variant dark:text-night-on-surface-variant">Relationship</dt>
+                    <dd class="text-on-surface dark:text-night-on-surface">{{ $student->guardian_relationship ?? '—' }}</dd>
                 </div>
                 <div>
-                    <dt class="text-gray-500 dark:text-gray-400">Phone</dt>
-                    <dd class="text-gray-900 dark:text-gray-100">{{ $student->emergency_contact_phone ?? '—' }}</dd>
+                    <dt class="text-on-surface-variant dark:text-night-on-surface-variant">Phone</dt>
+                    <dd class="text-on-surface dark:text-night-on-surface">{{ $student->guardian_phone ?? '—' }}</dd>
+                </div>
+                <div>
+                    <dt class="text-on-surface-variant dark:text-night-on-surface-variant">Email</dt>
+                    <dd class="text-on-surface dark:text-night-on-surface">{{ $student->guardian_email ?? '—' }}</dd>
+                </div>
+                <div>
+                    <dt class="text-on-surface-variant dark:text-night-on-surface-variant">Address</dt>
+                    <dd class="text-on-surface dark:text-night-on-surface">{{ $student->guardian_address ?? '—' }}</dd>
+                </div>
+            </dl>
+        </div>
+
+        <div class="glass-card rounded-lg p-lg">
+            <h3 class="font-label-sm uppercase tracking-wide text-on-surface-variant dark:text-night-on-surface-variant">Emergency Contact</h3>
+            <dl class="mt-4 space-y-3 font-body-md">
+                <div>
+                    <dt class="text-on-surface-variant dark:text-night-on-surface-variant">Name</dt>
+                    <dd class="text-on-surface dark:text-night-on-surface">{{ $student->emergency_contact_name ?? '—' }}</dd>
+                </div>
+                <div>
+                    <dt class="text-on-surface-variant dark:text-night-on-surface-variant">Relationship</dt>
+                    <dd class="text-on-surface dark:text-night-on-surface">{{ $student->emergency_contact_relationship ?? '—' }}</dd>
+                </div>
+                <div>
+                    <dt class="text-on-surface-variant dark:text-night-on-surface-variant">Phone</dt>
+                    <dd class="text-on-surface dark:text-night-on-surface">{{ $student->emergency_contact_phone ?? '—' }}</dd>
                 </div>
             </dl>
         </div>
