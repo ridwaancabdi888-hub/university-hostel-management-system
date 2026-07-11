@@ -77,10 +77,16 @@
     <input id="photo" name="photo" type="file" accept="image/*"
         class="mt-1 block w-full font-body-md text-on-surface-variant file:mr-4 file:rounded-DEFAULT file:border-0 file:bg-secondary-container/50 file:px-4 file:py-2 file:font-label-md file:font-semibold file:text-primary hover:file:bg-secondary-container dark:text-night-on-surface-variant dark:file:bg-night-secondary-container dark:file:text-night-primary">
     <x-input-error :messages="$errors->get('photo')" class="mt-2" />
+
+    <p class="mt-2 font-label-sm text-on-surface-variant dark:text-night-on-surface-variant">Or paste an image URL instead:</p>
+    <x-text-input id="photo_url" name="photo_url" type="url" class="mt-1 block w-full" placeholder="https://example.com/room-photo.jpg"
+        :value="old('photo_url')" />
+    <x-input-error :messages="$errors->get('photo_url')" class="mt-2" />
+
     @if ($room?->photoUrl())
         <div class="mt-2 flex items-center gap-2">
             <img src="{{ $room->photoUrl() }}" alt="{{ $room->room_number }}" class="h-12 w-16 rounded-DEFAULT object-cover">
-            <span class="font-label-sm text-on-surface-variant dark:text-night-on-surface-variant">Current photo — upload a new file to replace it.</span>
+            <span class="font-label-sm text-on-surface-variant dark:text-night-on-surface-variant">Current photo — upload a file or paste a URL to replace it.</span>
         </div>
     @endif
 </div>

@@ -7,45 +7,45 @@
 
 <x-dashboard-layout title="Dashboard">
     @if (isset($totalRooms))
-        <div class="sticky top-0 z-10 -mx-4 -mt-4 mb-xl flex flex-wrap items-center gap-x-8 gap-y-3 border-b border-outline-variant/20 bg-surface-container-lowest/80 px-4 py-4 backdrop-blur-xl dark:border-night-border dark:bg-night-surface/80 sm:-mx-6 sm:-mt-6 sm:px-6 lg:-mx-8 lg:-mt-8 lg:px-8">
-            <div class="flex items-center gap-2.5">
+        <div class="sticky top-0 z-10 -mx-4 -mt-4 mb-xl flex flex-wrap items-center gap-x-2 gap-y-3 border-b border-primary/20 bg-primary/10 px-4 py-3 backdrop-blur-xl dark:border-night-primary/20 dark:bg-night-primary/10 sm:-mx-6 sm:-mt-6 sm:px-6 lg:-mx-8 lg:-mt-8 lg:px-8">
+            <a href="{{ route('rooms.index') }}" class="flex items-center gap-2.5 rounded-DEFAULT px-3 py-2 transition-colors hover:bg-primary/30 dark:hover:bg-night-primary/30">
                 <span class="material-symbols-outlined text-primary dark:text-night-primary">bed</span>
                 <div>
                     <p class="font-headline-sm leading-none text-on-surface dark:text-night-on-surface">{{ number_format($totalOccupied) }}<span class="font-body-md font-normal text-outline dark:text-night-on-surface-variant"> / {{ number_format($totalCapacity) }}</span></p>
                     <p class="font-label-sm text-on-surface-variant dark:text-night-on-surface-variant">{{ $occupancyRate }}% Occupancy</p>
                 </div>
-            </div>
+            </a>
 
-            <div class="hidden h-9 w-px bg-outline-variant/20 dark:bg-night-border sm:block"></div>
+            <div class="hidden h-9 w-px bg-primary/20 dark:bg-night-primary/20 sm:block"></div>
 
-            <div class="flex items-center gap-2.5">
+            <a href="{{ route('maintenance.index') }}" class="flex items-center gap-2.5 rounded-DEFAULT px-3 py-2 transition-colors hover:bg-primary/30 dark:hover:bg-night-primary/30">
                 <span class="material-symbols-outlined text-tertiary dark:text-orange-400">build</span>
                 <div>
                     <p class="font-headline-sm leading-none text-on-surface dark:text-night-on-surface">{{ number_format($activeMaintenanceCount) }}</p>
                     <p class="font-label-sm text-on-surface-variant dark:text-night-on-surface-variant">Maintenance Active</p>
                 </div>
-            </div>
+            </a>
 
-            <div class="hidden h-9 w-px bg-outline-variant/20 dark:bg-night-border sm:block"></div>
+            <div class="hidden h-9 w-px bg-primary/20 dark:bg-night-primary/20 sm:block"></div>
 
-            <div class="flex items-center gap-2.5">
+            <a href="{{ route('visitors.index') }}" class="flex items-center gap-2.5 rounded-DEFAULT px-3 py-2 transition-colors hover:bg-primary/30 dark:hover:bg-night-primary/30">
                 <span class="material-symbols-outlined text-primary dark:text-night-primary">person_add</span>
                 <div>
                     <p class="font-headline-sm leading-none text-on-surface dark:text-night-on-surface">{{ number_format($pendingVisitorsCount) }}</p>
                     <p class="font-label-sm text-on-surface-variant dark:text-night-on-surface-variant">Pending Visitors</p>
                 </div>
-            </div>
+            </a>
 
             @if (isset($monthlyRevenue))
-                <div class="hidden h-9 w-px bg-outline-variant/20 dark:bg-night-border sm:block"></div>
+                <div class="hidden h-9 w-px bg-primary/20 dark:bg-night-primary/20 sm:block"></div>
 
-                <div class="flex items-center gap-2.5">
+                <a href="{{ route('invoices.index') }}" class="flex items-center gap-2.5 rounded-DEFAULT px-3 py-2 transition-colors hover:bg-primary/30 dark:hover:bg-night-primary/30">
                     <span class="material-symbols-outlined text-green-600 dark:text-green-400">payments</span>
                     <div>
                         <p class="font-headline-sm leading-none text-green-600 dark:text-green-400">${{ number_format($monthlyRevenue, 2) }}</p>
                         <p class="font-label-sm text-on-surface-variant dark:text-night-on-surface-variant">Monthly Revenue</p>
                     </div>
-                </div>
+                </a>
             @endif
 
             <a href="{{ route('blocks.create') }}" class="ml-auto inline-flex items-center gap-2 rounded-DEFAULT bg-primary px-md py-sm font-label-md text-on-primary hover:shadow-lg hover:shadow-primary/25 dark:bg-night-primary dark:text-night-on-primary transition-all">
@@ -70,7 +70,7 @@
                     };
                 @endphp
                 <div class="glass-card overflow-hidden rounded-lg transition hover:shadow-lg">
-                    <div class="relative h-32 w-full">
+                    <a href="{{ route('blocks.show', $block['id']) }}" class="relative block h-32 w-full">
                         @if ($block['photoUrl'])
                             <img src="{{ $block['photoUrl'] }}" alt="{{ $block['name'] }}" class="h-full w-full object-cover">
                         @else
@@ -89,7 +89,7 @@
                             <p class="font-label-md font-semibold text-white">{{ $block['name'] }}</p>
                             <p class="font-label-sm text-white/80">{{ $block['hostel'] }}</p>
                         </div>
-                    </div>
+                    </a>
                     <div class="p-md">
                         <div class="flex items-center justify-between font-label-sm text-on-surface-variant dark:text-night-on-surface-variant">
                             <span>Occupancy</span>
@@ -99,6 +99,7 @@
                             <div class="h-full rounded-full {{ $barColor }}" style="width: {{ min($block['rate'], 100) }}%"></div>
                         </div>
                         <div class="mt-4 flex items-center gap-4 font-label-sm font-medium">
+                            <a href="{{ route('blocks.show', $block['id']) }}" class="text-primary hover:underline dark:text-night-primary">View Block</a>
                             <a href="{{ route('rooms.index', ['block_id' => $block['id']]) }}" class="text-primary hover:underline dark:text-night-primary">Room Management</a>
                             <a href="{{ route('reports.occupancy') }}" class="text-primary hover:underline dark:text-night-primary">View Reports</a>
                         </div>

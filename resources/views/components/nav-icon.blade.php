@@ -14,6 +14,7 @@
         'support' => 'help',
         'chart-bar' => 'analytics',
         'door' => 'meeting_room',
+        'shield' => 'admin_panel_settings',
     ];
 @endphp
 

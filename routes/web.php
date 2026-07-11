@@ -17,6 +17,7 @@ use App\Http\Controllers\RoomController;
 use App\Http\Controllers\RoomRequestController;
 use App\Http\Controllers\RoomTypeController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\VisitorController;
 use Illuminate\Support\Facades\Route;
 
@@ -29,8 +30,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::middleware('role:admin,warden')->group(function () {
         Route::resource('rooms', RoomController::class);
+        Route::post('/rooms/bulk-photo', [RoomController::class, 'bulkUpdatePhoto'])->name('rooms.bulk-photo');
+        Route::post('/rooms/{room}/photos', [RoomController::class, 'addPhotos'])->name('rooms.photos');
         Route::resource('hostels', HostelController::class)->except('show');
-        Route::resource('blocks', BlockController::class)->except('show');
+        Route::resource('blocks', BlockController::class);
+        Route::post('/blocks/{block}/photos', [BlockController::class, 'addPhotos'])->name('blocks.photos');
         Route::resource('floors', FloorController::class)->except('show');
         Route::resource('room-types', RoomTypeController::class)->except('show');
 
@@ -149,6 +153,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     Route::middleware('role:admin')->group(function () {
+        Route::resource('users', UserController::class)->except('show');
+
         Route::get('/activity-log', [ActivityLogController::class, 'index'])->name('activity-log.index');
     });
 

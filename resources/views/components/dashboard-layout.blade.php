@@ -35,10 +35,10 @@
         <div class="flex h-screen overflow-hidden bg-background dark:bg-night-bg">
             <x-sidebar />
 
-            <div class="flex flex-1 flex-col overflow-hidden">
+            <div class="flex min-w-0 flex-1 flex-col overflow-hidden">
                 <x-navbar :title="$title" />
 
-                <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+                <main class="min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-4 sm:p-6 lg:p-8">
                     @if (session('status'))
                         <div class="mb-6 rounded-DEFAULT border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700 dark:border-green-800 dark:bg-green-500/10 dark:text-green-400">
                             {{ session('status') }}

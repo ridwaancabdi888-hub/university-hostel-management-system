@@ -22,11 +22,15 @@
             <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                 @forelse ($blocks as $block)
                     <tr>
-                        <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">{{ $block->name }}</td>
+                        <td class="px-4 py-3 text-sm font-medium">
+                            <a href="{{ route('blocks.show', $block) }}" class="text-gray-900 hover:text-indigo-600 dark:text-gray-100 dark:hover:text-indigo-400">{{ $block->name }}</a>
+                        </td>
                         <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $block->hostel->name }}</td>
                         <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $block->code ?? '—' }}</td>
                         <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $block->floors_count }}</td>
                         <td class="px-4 py-3 text-right text-sm">
+                            <a href="{{ route('blocks.show', $block) }}" class="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">View</a>
+                            <span class="mx-2 text-gray-300 dark:text-gray-600">|</span>
                             <a href="{{ route('blocks.edit', $block) }}" class="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">Edit</a>
                             <span class="mx-2 text-gray-300 dark:text-gray-600">|</span>
                             <x-delete-button :action="route('blocks.destroy', $block)" confirm="Delete this block?" class="inline">Delete</x-delete-button>

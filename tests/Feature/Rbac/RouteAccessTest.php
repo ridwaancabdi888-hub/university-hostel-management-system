@@ -101,6 +101,14 @@ class RouteAccessTest extends TestCase
         $this->actingAs($this->student)->get('/activity-log')->assertForbidden();
     }
 
+    public function test_user_management_is_restricted_to_admin(): void
+    {
+        $this->actingAs($this->admin)->get('/users')->assertOk();
+        $this->actingAs($this->warden)->get('/users')->assertForbidden();
+        $this->actingAs($this->accountant)->get('/users')->assertForbidden();
+        $this->actingAs($this->student)->get('/users')->assertForbidden();
+    }
+
     public function test_guest_is_redirected_to_login(): void
     {
         $this->get('/dashboard')->assertRedirect('/login');

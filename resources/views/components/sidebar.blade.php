@@ -17,7 +17,7 @@
 
 <aside
     :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
-    class="fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-outline-variant/20 bg-surface-container-lowest/80 backdrop-blur-xl transition-transform duration-200 ease-in-out dark:border-night-border dark:bg-night-surface/80 lg:static lg:translate-x-0"
+    class="fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-primary/20 bg-primary/10 backdrop-blur-xl transition-transform duration-200 ease-in-out dark:border-night-primary/20 dark:bg-night-primary/10 lg:static lg:translate-x-0"
 >
     <div class="flex h-16 items-center gap-3 border-b border-outline-variant/20 px-6 dark:border-night-border">
         <div class="flex h-9 w-9 items-center justify-center rounded-DEFAULT bg-primary text-on-primary dark:bg-night-primary dark:text-night-on-primary">

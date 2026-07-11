@@ -20,7 +20,15 @@ class Block extends Model
         'code',
         'description',
         'photo_path',
+        'photo_paths',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'photo_paths' => 'array',
+        ];
+    }
 
     public function hostel(): BelongsTo
     {
@@ -35,5 +43,17 @@ class Block extends Model
     public function photoUrl(): ?string
     {
         return $this->photo_path ? Storage::disk('public')->url($this->photo_path) : null;
+    }
+
+    /**
+     * URLs for the "View Block" gallery — up to 4 photos.
+     *
+     * @return list<string>
+     */
+    public function photoUrls(): array
+    {
+        return collect($this->photo_paths ?? [])
+            ->map(fn (string $path) => Storage::disk('public')->url($path))
+            ->all();
     }
 }

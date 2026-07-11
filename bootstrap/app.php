@@ -18,6 +18,12 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->append(SecurityHeaders::class);
+
+        // Trust the reverse proxy in front of us (e.g. a load balancer, or
+        // an ngrok tunnel during local testing) so Laravel reads the real
+        // client IP/scheme from X-Forwarded-* instead of generating
+        // http:// links behind an https:// tunnel.
+        $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

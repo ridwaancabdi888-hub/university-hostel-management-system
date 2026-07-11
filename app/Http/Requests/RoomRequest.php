@@ -44,6 +44,7 @@ class RoomRequest extends FormRequest
             'status' => ['required', Rule::enum(RoomStatus::class)],
             'notes' => ['nullable', 'string', 'max:1000'],
             'photo' => ['nullable', 'image', 'max:2048'],
+            'photo_url' => ['nullable', 'url', 'max:2048'],
         ];
     }
 }

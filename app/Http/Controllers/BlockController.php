@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\HandlesPhotoUploads;
+use App\Http\Requests\BlockPhotosRequest;
 use App\Http\Requests\BlockRequest;
 use App\Models\Block;
 use App\Models\Hostel;
@@ -11,6 +13,8 @@ use Illuminate\View\View;
 
 class BlockController extends Controller
 {
+    use HandlesPhotoUploads;
+
     /**
      * Display a listing of the resource.
      */
@@ -44,11 +48,24 @@ class BlockController extends Controller
         $data = $request->validated();
 
         Block::create([
-            ...collect($data)->except('photo')->toArray(),
-            'photo_path' => $request->hasFile('photo') ? $request->file('photo')->store('block-photos', 'public') : null,
+            ...collect($data)->except(['photo', 'photo_url'])->toArray(),
+            'photo_path' => $this->resolvePhotoPath($request, null, 'block-photos'),
         ]);
 
         return redirect()->route('blocks.index')->with('status', 'Block created.');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(Block $block): View
+    {
+        $block->load('hostel');
+
+        return view('blocks.show', [
+            'block' => $block,
+            'floorCount' => $block->floors()->count(),
+        ]);
     }
 
     /**
@@ -68,22 +85,32 @@ class BlockController extends Controller
     public function update(BlockRequest $request, Block $block): RedirectResponse
     {
         $data = $request->validated();
-        $photoPath = $block->photo_path;
-
-        if ($request->hasFile('photo')) {
-            if ($photoPath) {
-                Storage::disk('public')->delete($photoPath);
-            }
-
-            $photoPath = $request->file('photo')->store('block-photos', 'public');
-        }
 
         $block->update([
-            ...collect($data)->except('photo')->toArray(),
-            'photo_path' => $photoPath,
+            ...collect($data)->except(['photo', 'photo_url'])->toArray(),
+            'photo_path' => $this->resolvePhotoPath($request, $block->photo_path, 'block-photos'),
         ]);
 
         return redirect()->route('blocks.index')->with('status', 'Block updated.');
+    }
+
+    /**
+     * Replace the "View Block" gallery (up to 4 photos), deleting whichever
+     * gallery photos were there before.
+     */
+    public function addPhotos(BlockPhotosRequest $request, Block $block): RedirectResponse
+    {
+        foreach ($block->photo_paths ?? [] as $oldPath) {
+            Storage::disk('public')->delete($oldPath);
+        }
+
+        $paths = collect($request->file('photos'))
+            ->map(fn ($photo) => $photo->store('block-photos', 'public'))
+            ->all();
+
+        $block->update(['photo_paths' => $paths]);
+
+        return redirect()->route('blocks.show', $block)->with('status', 'Block photos updated.');
     }
 
     /**
@@ -98,6 +125,10 @@ class BlockController extends Controller
 
         if ($block->photo_path) {
             Storage::disk('public')->delete($block->photo_path);
+        }
+
+        foreach ($block->photo_paths ?? [] as $path) {
+            Storage::disk('public')->delete($path);
         }
 
         $block->delete();

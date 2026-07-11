@@ -77,6 +77,13 @@ class Navigation
                 'roles' => [Role::Admin, Role::Warden, Role::Accountant],
             ],
             [
+                'label' => 'User Management',
+                'route' => 'users.index',
+                'active' => ['users.*'],
+                'icon' => 'shield',
+                'roles' => [Role::Admin],
+            ],
+            [
                 'label' => 'Activity Log',
                 'route' => 'activity-log.index',
                 'active' => ['activity-log.*'],

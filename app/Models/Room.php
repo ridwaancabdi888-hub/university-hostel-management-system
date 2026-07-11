@@ -25,6 +25,7 @@ class Room extends Model
         'status',
         'notes',
         'photo_path',
+        'photo_paths',
     ];
 
     protected function casts(): array
@@ -33,6 +34,7 @@ class Room extends Model
             'capacity' => 'integer',
             'occupied_beds' => 'integer',
             'status' => RoomStatus::class,
+            'photo_paths' => 'array',
         ];
     }
 
@@ -59,6 +61,18 @@ class Room extends Model
     public function photoUrl(): ?string
     {
         return $this->photo_path ? Storage::disk('public')->url($this->photo_path) : null;
+    }
+
+    /**
+     * URLs for the "View Room" gallery — up to 4 photos.
+     *
+     * @return list<string>
+     */
+    public function photoUrls(): array
+    {
+        return collect($this->photo_paths ?? [])
+            ->map(fn (string $path) => Storage::disk('public')->url($path))
+            ->all();
     }
 
     /**

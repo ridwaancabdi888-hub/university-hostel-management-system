@@ -3,19 +3,27 @@
 namespace App\Http\Controllers;
 
 use App\Enums\RoomStatus;
+use App\Http\Controllers\Concerns\HandlesPhotoUploads;
+use App\Http\Requests\BulkRoomPhotoRequest;
+use App\Http\Requests\RoomPhotosRequest;
 use App\Http\Requests\RoomRequest;
 use App\Models\Block;
 use App\Models\Floor;
 use App\Models\Hostel;
 use App\Models\Room;
 use App\Models\RoomType;
+use App\Support\RemoteImageFetcher;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
+use InvalidArgumentException;
 
 class RoomController extends Controller
 {
+    use HandlesPhotoUploads;
+
     /**
      * Display a listing of the resource.
      */
@@ -43,6 +51,10 @@ class RoomController extends Controller
             $query->where('room_type_id', $roomTypeId);
         }
 
+        if ($capacity = $request->integer('capacity')) {
+            $query->where('capacity', $capacity);
+        }
+
         match ($request->string('status')->toString()) {
             'available' => $query->where('status', RoomStatus::Available)->whereColumn('occupied_beds', '<', 'capacity'),
             'full' => $query->where('status', RoomStatus::Available)->whereColumn('occupied_beds', '>=', 'capacity'),
@@ -57,8 +69,43 @@ class RoomController extends Controller
             'hostels' => Hostel::orderBy('name')->get(),
             'blocks' => Block::orderBy('name')->get(),
             'roomTypes' => RoomType::orderBy('name')->get(),
-            'filters' => $request->only(['search', 'hostel_id', 'block_id', 'room_type_id', 'status']),
+            'capacities' => Room::query()->distinct()->orderBy('capacity')->pluck('capacity'),
+            'filters' => $request->only(['search', 'hostel_id', 'block_id', 'room_type_id', 'capacity', 'status']),
         ]);
+    }
+
+    /**
+     * Apply the same photo (an upload or a fetched URL) to many rooms in a
+     * single action — fetches/reads the image once and writes a separate
+     * stored copy per room, so replacing one room's photo later can never
+     * delete a file another room still references.
+     */
+    public function bulkUpdatePhoto(BulkRoomPhotoRequest $request): RedirectResponse
+    {
+        if ($request->hasFile('photo')) {
+            $body = file_get_contents($request->file('photo')->getRealPath());
+            $extension = $request->file('photo')->extension() ?: 'jpg';
+        } else {
+            try {
+                [$body, $extension] = RemoteImageFetcher::fetchBytes($request->string('photo_url')->toString());
+            } catch (InvalidArgumentException $e) {
+                return back()->withErrors(['photo_url' => $e->getMessage()]);
+            }
+        }
+
+        $rooms = Room::whereIn('id', $request->input('room_ids'))->get();
+
+        foreach ($rooms as $room) {
+            if ($room->photo_path) {
+                Storage::disk('public')->delete($room->photo_path);
+            }
+
+            $path = 'room-photos/'.Str::random(40).".{$extension}";
+            Storage::disk('public')->put($path, $body);
+            $room->update(['photo_path' => $path]);
+        }
+
+        return redirect()->route('rooms.index')->with('status', $rooms->count().' room photo(s) updated.');
     }
 
     /**
@@ -81,6 +128,25 @@ class RoomController extends Controller
     }
 
     /**
+     * Replace the "View Room" gallery (up to 4 photos), deleting whichever
+     * gallery photos were there before.
+     */
+    public function addPhotos(RoomPhotosRequest $request, Room $room): RedirectResponse
+    {
+        foreach ($room->photo_paths ?? [] as $oldPath) {
+            Storage::disk('public')->delete($oldPath);
+        }
+
+        $paths = collect($request->file('photos'))
+            ->map(fn ($photo) => $photo->store('room-photos', 'public'))
+            ->all();
+
+        $room->update(['photo_paths' => $paths]);
+
+        return redirect()->route('rooms.show', $room)->with('status', 'Room photos updated.');
+    }
+
+    /**
      * Show the form for creating a new resource.
      */
     public function create(): View
@@ -99,8 +165,8 @@ class RoomController extends Controller
         $data = $request->validated();
 
         Room::create([
-            ...collect($data)->except('photo')->toArray(),
-            'photo_path' => $request->hasFile('photo') ? $request->file('photo')->store('room-photos', 'public') : null,
+            ...collect($data)->except(['photo', 'photo_url'])->toArray(),
+            'photo_path' => $this->resolvePhotoPath($request, null, 'room-photos'),
         ]);
 
         return redirect()->route('rooms.index')->with('status', 'Room created.');
@@ -124,19 +190,10 @@ class RoomController extends Controller
     public function update(RoomRequest $request, Room $room): RedirectResponse
     {
         $data = $request->validated();
-        $photoPath = $room->photo_path;
-
-        if ($request->hasFile('photo')) {
-            if ($photoPath) {
-                Storage::disk('public')->delete($photoPath);
-            }
-
-            $photoPath = $request->file('photo')->store('room-photos', 'public');
-        }
 
         $room->update([
-            ...collect($data)->except('photo')->toArray(),
-            'photo_path' => $photoPath,
+            ...collect($data)->except(['photo', 'photo_url'])->toArray(),
+            'photo_path' => $this->resolvePhotoPath($request, $room->photo_path, 'room-photos'),
         ]);
 
         return redirect()->route('rooms.index')->with('status', 'Room updated.');
@@ -154,6 +211,10 @@ class RoomController extends Controller
 
         if ($room->photo_path) {
             Storage::disk('public')->delete($room->photo_path);
+        }
+
+        foreach ($room->photo_paths ?? [] as $path) {
+            Storage::disk('public')->delete($path);
         }
 
         $room->delete();
