@@ -2,6 +2,12 @@
 
 A Laravel 12 application for running university hostel operations end to end: room inventory, student registration, room allocation, billing and payments, maintenance requests, visitor management, and a role-based reporting center — with production hardening (authorization policies, security headers, rate limiting, activity logging, and automated backups) built in.
 
+## Search indexing policy
+
+This system contains private student, visitor, billing, payment, maintenance, room-allocation, and audit data. Its Blade layouts, security middleware, and `robots.txt` therefore instruct search engines not to index any authentication or dashboard route. A sitemap and public structured data are intentionally omitted.
+
+Do not submit the management system or its interactive portfolio demo to Google Search Console for indexing. If a university later publishes public hostel information, use a separate canonical domain and include only approved accommodation descriptions, eligibility rules, application instructions, verified contacts, accessibility information, fees, and privacy terms after institutional review.
+
 ## Features
 
 - **Room Inventory** — hostels, blocks, floors, room types, and rooms with capacity/occupancy tracking.
