@@ -1,7 +1,12 @@
 @props(['title' => null])
 
 <header class="sticky top-0 z-20 flex h-16 items-center gap-4 border-b border-primary/20 bg-primary/10 px-4 backdrop-blur-xl dark:border-night-primary/20 dark:bg-night-primary/10 sm:px-6">
-    <button @click="sidebarOpen = ! sidebarOpen" class="text-on-surface-variant hover:text-on-surface dark:text-night-on-surface-variant dark:hover:text-night-on-surface lg:hidden">
+    <button
+        @click="sidebarOpen = ! sidebarOpen"
+        :aria-expanded="sidebarOpen"
+        aria-label="Toggle navigation menu"
+        class="text-on-surface-variant hover:text-on-surface dark:text-night-on-surface-variant dark:hover:text-night-on-surface lg:hidden"
+    >
         <span class="material-symbols-outlined">menu</span>
     </button>
 
