@@ -36,7 +36,23 @@ Do not submit the management system or its interactive portfolio demo to Google 
 
 ```bash
 composer install
+```
+
+Create the local environment file using the command for your operating system:
+
+```bash
+# macOS or Linux
 cp .env.example .env
+```
+
+```powershell
+# Windows PowerShell
+Copy-Item .env.example .env
+```
+
+Then generate the application key:
+
+```bash
 php artisan key:generate
 ```
 
@@ -53,8 +69,21 @@ Visit `http://localhost:8000`.
 
 ### Option B — Docker
 
+Create the environment file first:
+
 ```bash
+# macOS or Linux
 cp .env.example .env
+```
+
+```powershell
+# Windows PowerShell
+Copy-Item .env.example .env
+```
+
+Then start the containers and initialize the application:
+
+```bash
 docker compose up -d --build
 docker compose exec app php artisan key:generate
 docker compose exec app php artisan migrate --seed
