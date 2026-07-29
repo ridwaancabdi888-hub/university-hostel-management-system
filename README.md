@@ -67,6 +67,14 @@ php artisan serve
 
 Visit `http://localhost:8000`.
 
+For day-to-day development, the existing Composer script can start the Laravel server, queue listener, log viewer, and Vite together:
+
+```bash
+composer run dev
+```
+
+Stop all four processes with `Ctrl+C`.
+
 ### Option B — Docker
 
 Create the environment file first:
