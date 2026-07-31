@@ -30,6 +30,17 @@ Do not submit the management system or its interactive portfolio demo to Google 
 - **PDF/Excel**: `barryvdh/laravel-dompdf`, `maatwebsite/excel`
 - **Testing**: PHPUnit (SQLite in-memory for the test suite)
 
+## Prerequisites
+
+For local installation, have these tools available:
+
+- PHP 8.2 or newer
+- Composer
+- Node.js 20.19+ (20.x) or 22.12+
+- MySQL
+
+Docker and Docker Compose can be used instead of installing the local PHP, Composer, Node.js, and MySQL toolchain.
+
 ## Getting Started
 
 ### Option A — Local (PHP/Composer/Node installed)
