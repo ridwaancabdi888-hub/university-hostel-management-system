@@ -26,7 +26,7 @@ Do not submit the management system or its interactive portfolio demo to Google 
 
 - **Backend**: PHP 8.2, Laravel 12
 - **Frontend**: Blade, Tailwind CSS, Alpine.js, Vite
-- **Database**: MySQL
+- **Database**: MySQL for local/Docker setups; PostgreSQL is supported for hosted deployments
 - **PDF/Excel**: `barryvdh/laravel-dompdf`, `maatwebsite/excel`
 - **Testing**: PHPUnit (SQLite in-memory for the test suite)
 
