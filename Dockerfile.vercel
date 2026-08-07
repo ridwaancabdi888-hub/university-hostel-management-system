@@ -1,0 +1,39 @@
+# syntax=docker/dockerfile:1
+
+FROM node:20-alpine AS assets
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY resources/ resources/
+COPY vite.config.js tailwind.config.js postcss.config.js ./
+RUN npm run build
+
+FROM php:8.2-cli AS app
+
+WORKDIR /var/www/html
+
+RUN apt-get update && apt-get install -y \
+        libzip-dev \
+        libpng-dev \
+        libonig-dev \
+        libpq-dev \
+        libxml2-dev \
+        zip \
+        unzip \
+        git \
+    && docker-php-ext-install pdo_pgsql gd zip bcmath \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+COPY . .
+COPY --from=assets /app/public/build ./public/build
+
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress \
+    && chown -R www-data:www-data storage bootstrap/cache
+
+USER www-data
+
+CMD ["sh", "-c", "exec php artisan serve --host=0.0.0.0 --port=${PORT:-3000}"]
