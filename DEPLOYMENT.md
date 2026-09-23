@@ -7,7 +7,7 @@ This guide covers deploying the University Hostel Management System to a product
 - PHP 8.2+ with extensions: `pdo_mysql`, `mbstring`, `gd` (for PDF generation), `zip` (for Excel export), `bcmath`, `xml`, `curl`, `fileinfo`
 - MySQL 8.0+ (or MariaDB 10.6+)
 - Composer 2.x
-- Node.js 20+ / npm (build-time only — not needed at runtime)
+- Node.js 20.19+ (20.x) or 22.12+ / npm (build-time only — not needed at runtime)
 - A web server (nginx or Apache) in front of PHP-FPM
 - `mysqldump` on `PATH` (required by the backup system)
 
