@@ -9,7 +9,7 @@ class Navigation
     /**
      * The application's primary navigation items.
      *
-     * @return list<array{label: string, route: string, icon: string, roles: list<Role>}>
+     * @return list<array{label: string, route: string, active?: list<string>, icon: string, roles: list<Role>}>
      */
     public static function items(): array
     {
@@ -96,7 +96,7 @@ class Navigation
     /**
      * The navigation items visible to the given role.
      *
-     * @return list<array{label: string, route: string, icon: string, roles: list<Role>}>
+     * @return list<array{label: string, route: string, active?: list<string>, icon: string, roles: list<Role>}>
      */
     public static function for(Role $role): array
     {
