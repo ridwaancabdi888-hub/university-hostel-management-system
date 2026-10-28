@@ -47,16 +47,16 @@
         </div>
     </div>
 
-    <div class="glass-card mt-6 rounded-lg p-lg" x-data="{}">
+    <div class="glass-card mt-6 rounded-lg p-lg" x-data="photoUploadDisclosure(@js($errors->any()))">
         <div class="flex items-center justify-between">
             <h3 class="font-label-sm uppercase tracking-wide text-on-surface-variant dark:text-night-on-surface-variant">Gallery</h3>
-            <button type="button" @click="$refs.photoForm.classList.toggle('hidden')" class="inline-flex items-center gap-2 font-label-md font-medium text-primary hover:underline dark:text-night-primary">
+            <button type="button" x-ref="photoToggle" @click="toggle()" aria-controls="room-photo-upload-form" :aria-expanded="open.toString()" class="inline-flex items-center gap-2 font-label-md font-medium text-primary hover:underline dark:text-night-primary">
                 <span class="material-symbols-outlined text-[18px]">add_photo_alternate</span>
                 Add Photo
             </button>
         </div>
 
-        <form x-ref="photoForm" method="POST" action="{{ route('rooms.photos', $room) }}" enctype="multipart/form-data" class="{{ $errors->any() ? '' : 'hidden' }} mt-4 rounded-DEFAULT border border-outline-variant/30 p-md dark:border-night-border">
+        <form id="room-photo-upload-form" x-show="open" x-cloak @keydown.escape="close(); $nextTick(() => $refs.photoToggle.focus())" method="POST" action="{{ route('rooms.photos', $room) }}" enctype="multipart/form-data" class="mt-4 rounded-DEFAULT border border-outline-variant/30 p-md dark:border-night-border">
             @csrf
             <x-input-label for="photos" value="Upload up to 4 photos (replaces the current gallery)" />
             <input id="photos" name="photos[]" type="file" accept="image/*" multiple

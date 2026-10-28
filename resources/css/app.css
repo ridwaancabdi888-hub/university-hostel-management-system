@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+[x-cloak] {
+    display: none !important;
+}
+
 /* "Academic Sanctuary" design system — self-hosted fonts (no external font
    CDN, keeping the app's Content-Security-Policy unchanged). */
 
