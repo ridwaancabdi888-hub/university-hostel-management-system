@@ -21,7 +21,14 @@
     @endphp
     <x-dropdown align="right" width="w-80">
         <x-slot name="trigger">
-            <button class="relative rounded-[12px] p-2 text-on-surface-variant hover:bg-secondary-container/30 hover:text-on-surface dark:text-night-on-surface-variant dark:hover:bg-night-surface-high dark:hover:text-night-on-surface" aria-label="Notifications">
+            <button
+                x-ref="trigger"
+                :aria-controls="$id('dropdown-panel')"
+                :aria-expanded="open.toString()"
+                aria-haspopup="true"
+                aria-label="Notifications"
+                class="relative rounded-[12px] p-2 text-on-surface-variant hover:bg-secondary-container/30 hover:text-on-surface dark:text-night-on-surface-variant dark:hover:bg-night-surface-high dark:hover:text-night-on-surface"
+            >
                 <span class="material-symbols-outlined text-[22px]">notifications</span>
                 @if ($unreadCount > 0)
                     <span class="absolute right-1.5 top-1.5 flex h-2 w-2 rounded-full bg-error dark:bg-night-error"></span>
@@ -74,7 +81,14 @@
     <!-- User dropdown -->
     <x-dropdown align="right" width="48">
         <x-slot name="trigger">
-            <button class="flex items-center gap-2 rounded-[12px] px-2 py-1.5 hover:bg-secondary-container/30 dark:hover:bg-night-surface-high">
+            <button
+                x-ref="trigger"
+                :aria-controls="$id('dropdown-panel')"
+                :aria-expanded="open.toString()"
+                aria-haspopup="true"
+                aria-label="Open account menu"
+                class="flex items-center gap-2 rounded-[12px] px-2 py-1.5 hover:bg-secondary-container/30 dark:hover:bg-night-surface-high"
+            >
                 <span class="flex h-8 w-8 items-center justify-center rounded-full bg-primary font-label-md font-medium text-on-primary dark:bg-night-primary dark:text-night-on-primary">
                     {{ Str::of(auth()->user()->name)->substr(0, 1)->upper() }}
                 </span>

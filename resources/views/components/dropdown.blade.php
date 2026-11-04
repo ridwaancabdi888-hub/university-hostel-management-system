@@ -13,12 +13,22 @@ $width = match ($width) {
 };
 @endphp
 
-<div class="relative" x-data="{ open: false }" @click.outside="open = false" @close.stop="open = false">
-    <div @click="open = ! open">
+<div
+    class="relative"
+    x-data="dropdownMenu"
+    x-id="['dropdown-panel']"
+    @click.outside="close()"
+    @close.stop="close()"
+    @keydown.escape.prevent.stop="closeAndRestoreFocus()"
+>
+    <div @click="toggle()">
         {{ $trigger }}
     </div>
 
-    <div x-show="open"
+    <div
+            x-ref="panel"
+            :id="$id('dropdown-panel')"
+            x-show="open"
             x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0 scale-95"
             x-transition:enter-end="opacity-100 scale-100"
@@ -27,7 +37,7 @@ $width = match ($width) {
             x-transition:leave-end="opacity-0 scale-95"
             class="absolute z-50 mt-2 {{ $width }} max-w-[calc(100vw-2rem)] rounded-DEFAULT shadow-lg {{ $alignmentClasses }}"
             style="display: none;"
-            @click="open = false">
+            @click="close()">
         <div class="rounded-DEFAULT ring-1 ring-outline-variant/30 dark:ring-night-border {{ $contentClasses }}">
             {{ $content }}
         </div>

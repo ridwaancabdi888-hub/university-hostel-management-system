@@ -1,11 +1,13 @@
 import './bootstrap';
 import './gallery-carousel';
 import * as modalFocus from './modal-focus';
+import { dropdownMenu } from './dropdown-menu';
 import { photoUploadDisclosure } from './photo-upload-disclosure';
 
 import Alpine from 'alpinejs';
 
 window.Alpine = Alpine;
+window.dropdownMenu = dropdownMenu;
 window.modalFocus = modalFocus;
 window.photoUploadDisclosure = photoUploadDisclosure;
 
