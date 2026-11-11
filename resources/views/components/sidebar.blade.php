@@ -16,6 +16,7 @@
 ></div>
 
 <aside
+    id="primary-navigation"
     :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
     class="fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-primary/20 bg-primary/10 backdrop-blur-xl transition-transform duration-200 ease-in-out dark:border-night-primary/20 dark:bg-night-primary/10 lg:static lg:translate-x-0"
 >
@@ -29,11 +30,12 @@
         </div>
     </div>
 
-    <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+    <nav aria-label="Primary navigation" class="flex-1 space-y-1 overflow-y-auto px-3 py-4">
         @foreach ($navigation as $item)
             @php $isActive = request()->routeIs(...($item['active'] ?? [$item['route']])); @endphp
             <a
                 href="{{ route($item['route']) }}"
+                @if ($isActive) aria-current="page" @endif
                 @class([
                     'flex items-center gap-3 rounded-[12px] border-l-[3px] px-3 py-2 font-label-md transition',
                     'border-primary bg-secondary-container/60 text-primary dark:border-night-primary dark:bg-night-secondary-container dark:text-night-primary' => $isActive,

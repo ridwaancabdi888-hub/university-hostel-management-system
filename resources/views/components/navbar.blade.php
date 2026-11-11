@@ -4,6 +4,7 @@
     <button
         @click="sidebarOpen = ! sidebarOpen"
         :aria-expanded="sidebarOpen"
+        aria-controls="primary-navigation"
         aria-label="Toggle navigation menu"
         class="text-on-surface-variant hover:text-on-surface dark:text-night-on-surface-variant dark:hover:text-night-on-surface lg:hidden"
     >
@@ -26,12 +27,12 @@
                 :aria-controls="$id('dropdown-panel')"
                 :aria-expanded="open.toString()"
                 aria-haspopup="true"
-                aria-label="Notifications"
+                aria-label="Notifications, {{ $unreadCount }} unread"
                 class="relative rounded-[12px] p-2 text-on-surface-variant hover:bg-secondary-container/30 hover:text-on-surface dark:text-night-on-surface-variant dark:hover:bg-night-surface-high dark:hover:text-night-on-surface"
             >
                 <span class="material-symbols-outlined text-[22px]">notifications</span>
                 @if ($unreadCount > 0)
-                    <span class="absolute right-1.5 top-1.5 flex h-2 w-2 rounded-full bg-error dark:bg-night-error"></span>
+                    <span aria-hidden="true" class="absolute right-1.5 top-1.5 flex h-2 w-2 rounded-full bg-error dark:bg-night-error"></span>
                 @endif
             </button>
         </x-slot>
@@ -54,7 +55,7 @@
                         <button type="submit" class="block w-full px-4 py-3 text-left hover:bg-secondary-container/20 dark:hover:bg-night-surface-high">
                             <span class="block font-label-md font-medium text-on-surface dark:text-night-on-surface">{{ $notification->data['title'] ?? 'Notification' }}</span>
                             <span class="mt-0.5 block font-label-sm text-on-surface-variant dark:text-night-on-surface-variant">{{ $notification->data['message'] ?? '' }}</span>
-                            <span class="mt-0.5 block font-label-sm text-outline dark:text-night-on-surface-variant/70">{{ $notification->created_at->diffForHumans() }}</span>
+                            <time datetime="{{ $notification->created_at->toIso8601String() }}" class="mt-0.5 block font-label-sm text-outline dark:text-night-on-surface-variant/70">{{ $notification->created_at->diffForHumans() }}</time>
                         </button>
                     </form>
                 @empty

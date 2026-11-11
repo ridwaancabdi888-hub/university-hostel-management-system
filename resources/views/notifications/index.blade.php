@@ -19,13 +19,14 @@
                             <div>
                                 <div class="flex items-center gap-2">
                                     @if (! $notification->read_at)
-                                        <span class="h-2 w-2 rounded-full bg-indigo-600"></span>
+                                        <span aria-hidden="true" class="h-2 w-2 rounded-full bg-indigo-600"></span>
+                                        <span class="sr-only">Unread:</span>
                                     @endif
                                     <span class="font-medium text-gray-900 dark:text-gray-100">{{ $notification->data['title'] ?? 'Notification' }}</span>
                                 </div>
                                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ $notification->data['message'] ?? '' }}</p>
                             </div>
-                            <span class="whitespace-nowrap text-xs text-gray-400 dark:text-gray-500">{{ $notification->created_at->diffForHumans() }}</span>
+                            <time datetime="{{ $notification->created_at->toIso8601String() }}" class="whitespace-nowrap text-xs text-gray-400 dark:text-gray-500">{{ $notification->created_at->diffForHumans() }}</time>
                         </button>
                     </form>
                 </li>

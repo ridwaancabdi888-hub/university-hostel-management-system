@@ -42,13 +42,13 @@
 
                 <main class="min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-4 sm:p-6 lg:p-8">
                     @if (session('status'))
-                        <div class="mb-6 rounded-DEFAULT border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700 dark:border-green-800 dark:bg-green-500/10 dark:text-green-400">
+                        <div role="status" aria-live="polite" class="mb-6 rounded-DEFAULT border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700 dark:border-green-800 dark:bg-green-500/10 dark:text-green-400">
                             {{ session('status') }}
                         </div>
                     @endif
 
                     @if (session('error'))
-                        <div class="mb-6 rounded-DEFAULT border border-error/20 bg-error-container px-4 py-3 text-sm text-on-error-container dark:border-night-error/30 dark:bg-night-error-container dark:text-night-error">
+                        <div role="alert" aria-live="assertive" class="mb-6 rounded-DEFAULT border border-error/20 bg-error-container px-4 py-3 text-sm text-on-error-container dark:border-night-error/30 dark:bg-night-error-container dark:text-night-error">
                             {{ session('error') }}
                         </div>
                     @endif
